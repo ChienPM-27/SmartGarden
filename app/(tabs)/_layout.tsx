@@ -15,6 +15,22 @@ const _Layout = () => {
                     tabBarButton: () => null,
                 }}
             />
+            <Tabs.Screen
+                name="create-account"
+                options={{
+                    title: 'Create account',
+                    headerShown: false,
+                    tabBarButton: () => null,
+                }}
+            />
+            <Tabs.Screen
+                name="forgot-password"
+                options={{
+                    title: 'Forgot password',
+                    headerShown: false,
+                    tabBarButton: () => null,
+                }}
+            />
         </Tabs>
     );
 };
