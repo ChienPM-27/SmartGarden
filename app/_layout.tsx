@@ -8,7 +8,7 @@ export default function RootLayout() {
       options={{ headerShown: false }}
     />
     <Stack.Screen
-      name="detail/[id]"
+      name="index"
       options={{ headerShown: false }}
     />
   </Stack>

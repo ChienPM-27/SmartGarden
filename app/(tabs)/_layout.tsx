@@ -8,7 +8,7 @@ const _Layout = () => {
             }}
         >
             <Tabs.Screen
-                name="index"
+                name="login"
                 options={{
                     title: 'Home',
                     headerShown: false,
@@ -27,6 +27,14 @@ const _Layout = () => {
                 name="forgot-password"
                 options={{
                     title: 'Forgot password',
+                    headerShown: false,
+                    tabBarButton: () => null,
+                }}
+            />
+            <Tabs.Screen
+                name="role"
+                options={{
+                    title: 'Role',
                     headerShown: false,
                     tabBarButton: () => null,
                 }}
