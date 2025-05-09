@@ -1,4 +1,3 @@
-// components/WeatherComponent.tsx
 import { useEffect, useState } from 'react';
 import { View, Text, ActivityIndicator, Image } from 'react-native';
 import { fetchWeather } from '@/service/weatherService';
@@ -48,31 +47,28 @@ const WeatherComponent = () => {
     }
 
     return (
-        <View className="flex-1 items-center justify-center bg-white p-4">
+        <View className="flex-1 items-center justify-center p-4">
             {weather && (
-                <View className="items-center">
-                    <Text className="text-xl font-bold">
-                        Thời tiết tại {weather.location.name}, {weather.location.country}
-                    </Text>
-                    <Text className="text-lg">
-                        Nhiệt độ: {weather.current.temperature}°C
-                    </Text>
-                    <Text className="text-lg">
-                        Mô tả: {weather.current.weather_descriptions[0]}
-                    </Text>
-                    <Text className="text-lg">
-                        Độ ẩm: {weather.current.humidity}%
-                    </Text>
-                    <Text className="text-lg">
-                        Tốc độ gió: {weather.current.wind_speed} km/h
-                    </Text>
-                    <Text className="text-lg">
-                        Cảm giác: {weather.current.feelslike}°C
+                <View className="bg-white p-6 rounded-2xl shadow-lg items-center w-5/6">
+                    <Text className="text-3xl font-bold text-gray-800 mb-2">
+                        {weather.location.name}, {weather.location.country}
                     </Text>
                     <Image
                         source={{ uri: weather.current.weather_icons[0] }}
-                        style={{ width: 64, height: 64, marginTop: 10 }}
+                        style={{ width: 100, height: 100, marginVertical: 10 }}
                     />
+                    <Text className="text-2xl text-gray-700 mb-1">
+                        🌡️ {weather.current.temperature}°C - {weather.current.weather_descriptions[0]}
+                    </Text>
+                    <Text className="text-base text-gray-600 mb-1">
+                        💧 Độ ẩm: {weather.current.humidity}%
+                    </Text>
+                    <Text className="text-base text-gray-600 mb-1">
+                        💨 Tốc độ gió: {weather.current.wind_speed} km/h
+                    </Text>
+                    <Text className="text-base text-gray-600">
+                        🌡️ Cảm giác: {weather.current.feelslike}°C
+                    </Text>
                 </View>
             )}
         </View>
