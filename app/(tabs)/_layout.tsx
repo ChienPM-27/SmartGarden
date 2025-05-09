@@ -31,14 +31,6 @@ const _Layout = () => {
                     tabBarButton: () => null,
                 }}
             />
-            <Tabs.Screen
-                name="role"
-                options={{
-                    title: 'Role',
-                    headerShown: false,
-                    tabBarButton: () => null,
-                }}
-            />
         </Tabs>
     );
 };
