@@ -53,7 +53,7 @@ const styles = StyleSheet.create({
         borderTopLeftRadius: 30,
         borderTopRightRadius: 30,
         paddingVertical: 20,  // Giảm padding để đưa thanh lên cao hơn
-        paddingHorizontal: 15,
+        paddingHorizontal: 10,
         position: 'absolute',
         bottom: 0,
         left: 0,
@@ -63,7 +63,7 @@ const styles = StyleSheet.create({
         shadowOffset: { width: 0, height: -2 },
         shadowOpacity: 0.2,
         shadowRadius: 4,
-        marginBottom: 10,  // Tạo khoảng cách từ dưới màn hình
+        marginBottom: 0,  // Tạo khoảng cách từ dưới màn hình
     },
     buttonText: {
         color: '#FFFFFF',

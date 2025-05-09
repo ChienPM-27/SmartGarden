@@ -1,6 +1,6 @@
 // services/weatherService.ts
 import axios from 'axios';
-import { WEATHER_API_KEY, WEATHER_API_URL } from '@/service/weatherStack';
+import { WEATHER_API_KEY, WEATHER_API_URL } from '@/components/services/weatherStack';
 
 export const fetchWeather = async (location: string) => {
     try {

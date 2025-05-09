@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { View, Text, ActivityIndicator, Image } from 'react-native';
-import { fetchWeather } from '@/service/weatherService';
+import { fetchWeather } from '@/components/services/weatherService';
 
 interface WeatherData {
     location: {

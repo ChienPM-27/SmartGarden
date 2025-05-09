@@ -1,7 +1,7 @@
 // screens/HomeScreen.tsx
 import React from 'react';
 import { View } from 'react-native';
-import WeatherComponent from '@/components/weatherComponent';  // Đảm bảo đường dẫn đúng
+import WeatherComponent from '@/components/Weather/weatherComponent';  // Đảm bảo đường dẫn đúng
 
 const HomeScreen = () => {
     return (

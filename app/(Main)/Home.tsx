@@ -7,14 +7,13 @@ import {
   TouchableOpacity,
   StyleSheet,
 } from 'react-native';
-import { Plant, initialPlantsData } from '@/components/Home/types'; // Điều chỉnh đường dẫn
-import SearchBar from '@/components/Home/SearchBar';
-import AddPlantModal from '@/components/Home/AddPlantModal';
-import FilterModal from '@/components/Home/FilterModal';
-import PlantDetailModal from '@/components/Home/PlantDetailModal';
-import EditPlantModal from '@/components/Home/EditPlantModal';
-import NavigationBar from '@/components/NavigationBar';
+import { Plant, initialPlantsData } from '@/components/Common/types';
+import SearchBar from '@/components/Plants/SearchBar';
+import FilterModal from '@/components/Plants/FilterModal';
+import PlantDetailModal from '@/components/Plants/PlantDetailModal';
+import NavigationBar from '@/components/Common/NavigationBar';
 import { MaterialIcons } from '@expo/vector-icons';
+import PlantList from '@/components/Plants/PlantList';
 
 const SmartGardenHome = () => {
   const [plants, setPlants] = useState<Plant[]>(initialPlantsData);
@@ -62,25 +61,6 @@ const SmartGardenHome = () => {
   // Hàm lọc (cập nhật filterCriteria)
   const handleFilter = () => {
     setFilterVisible(false);
-};
-
-
-  // Thêm cây mới
-  const handleAddPlant = () => {
-    if (!newPlant.name.trim()) return alert('Vui lòng nhập tên cây');
-    const newId = (plants.length + 1).toString();
-    const plantToAdd = { ...newPlant, id: newId };
-    setPlants([...plants, plantToAdd]);
-    setNewPlant({
-      id: '',
-      name: '',
-      description: '',
-      icon: 'grass',
-      type: '',
-      progress: '',
-      photoUri: undefined,
-    });
-    setModalVisible(false);
   };
 
   // Mở modal chi tiết cây
@@ -119,12 +99,31 @@ const SmartGardenHome = () => {
     setSelectedPlant(null);
   };
 
+  // Hàm cập nhật ảnh cây trồng
+  const updatePlantPhoto = (photoUri: string) => {
+    if (selectedPlant) {
+      const updatedPlant = { ...selectedPlant, photoUri };
+      setSelectedPlant(updatedPlant);
+      setPlants(plants.map((p) => (p.id === selectedPlant.id ? updatedPlant : p)));
+    }
+  };
+
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#DCFCE7' }}>
-      <View style={{ padding: 16, flexDirection: 'row', justifyContent: 'space-between' }}>
+      <View
+        style={{
+          padding: 16,
+          flexDirection: 'row',
+          justifyContent: 'space-between',
+        }}
+      >
         <View>
-          <Text style={{ fontWeight: 'bold', fontSize: 40, color: '#166534' }}>Smart</Text>
-          <Text style={{ fontWeight: 'bold', fontSize: 40, color: '#166534' }}>Garden</Text>
+          <Text style={{ fontWeight: 'bold', fontSize: 40, color: '#166534' }}>
+            Smart
+          </Text>
+          <Text style={{ fontWeight: 'bold', fontSize: 40, color: '#166534' }}>
+            Garden
+          </Text>
         </View>
         <View
           style={{
@@ -152,43 +151,9 @@ const SmartGardenHome = () => {
         setFilterVisible={setFilterVisible}
       />
 
-      <FlatList
-        data={plants}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <TouchableOpacity
-            style={{
-              backgroundColor: '#FFFFFF',
-              borderRadius: 25,
-              marginHorizontal: 16,
-              marginVertical: 8,
-              padding: 16,
-              flexDirection: 'row',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-            }}
-            onPress={() => handleOpenPlantDetail(item)}
-            accessibilityLabel={`View details for ${item.name}`}
-          >
-            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-              <MaterialIcons name={item.icon} size={24} color="#059669" />
-              <View style={{ marginLeft: 16 }}>
-                <Text style={{ color: '#166534', fontWeight: 'bold' }}>{item.name}</Text>
-                <Text style={{ color: '#6B7280' }}>{item.description}</Text>
-              </View>
-            </View>
-            <MaterialIcons name="chevron-right" size={24} color="#059669" />
-          </TouchableOpacity>
-        )}
-        contentContainerStyle={{ paddingBottom: 100 }}
-      />
-
-      <AddPlantModal
-        modalVisible={modalVisible}
-        setModalVisible={setModalVisible}
-        newPlant={newPlant}
-        setNewPlant={setNewPlant}
-        handleAddPlant={handleAddPlant}
+      <PlantList
+        plants={plants}
+        handleOpenPlantDetail={handleOpenPlantDetail}
       />
 
       <FilterModal
@@ -204,14 +169,7 @@ const SmartGardenHome = () => {
         handleClosePlantDetail={handleClosePlantDetail}
         openEditModal={openEditModal}
         handleDeletePlant={handleDeletePlant}
-      />
-
-      <EditPlantModal
-        editModalVisible={editModalVisible}
-        setEditModalVisible={setEditModalVisible}
-        editingPlant={editingPlant}
-        setEditingPlant={setEditingPlant}
-        handleSaveEdit={handleSaveEdit}
+        updatePlantPhoto={updatePlantPhoto}
       />
 
       <View
@@ -229,3 +187,56 @@ const SmartGardenHome = () => {
 };
 
 export default SmartGardenHome;
+
+const styles = StyleSheet.create({
+  overlay: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalContainer: {
+    width: '80%',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20,
+    padding: 16,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#14532d',
+    marginBottom: 12,
+    textAlign: 'center',
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: '#D1D5DB',
+    borderRadius: 8,
+    padding: 10,
+    marginBottom: 10,
+  },
+  buttonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 10,
+  },
+  saveButton: {
+    flex: 1,
+    backgroundColor: '#10B981',
+    borderRadius: 8,
+    paddingVertical: 12,
+    marginRight: 5,
+  },
+  cancelButton: {
+    flex: 1,
+    backgroundColor: '#9CA3AF',
+    borderRadius: 8,
+    paddingVertical: 12,
+    marginLeft: 5,
+  },
+  buttonText: {
+    textAlign: 'center',
+    color: '#FFFFFF',
+    fontWeight: 'bold',
+  },
+});
