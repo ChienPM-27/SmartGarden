@@ -70,7 +70,7 @@ const SmartGardenHome = () => {
 
   // Đóng modal chi tiết
   const handleClosePlantDetail = () => {
-    setSelectedPlant(null);
+  setSelectedPlant(null);
   };
 
   // Mở modal chỉnh sửa
@@ -95,8 +95,8 @@ const SmartGardenHome = () => {
   // Xóa cây
   const handleDeletePlant = () => {
     if (!selectedPlant) return;
-    setPlants(plants.filter((p) => p.id !== selectedPlant.id));
-    setSelectedPlant(null);
+      setPlants(plants.filter((p) => p.id !== selectedPlant.id));
+      handleClosePlantDetail(); // Sử dụng hàm đóng modal mới
   };
 
   // Hàm cập nhật ảnh cây trồng

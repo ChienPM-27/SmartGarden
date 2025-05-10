@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     Modal,
     View,
@@ -6,7 +6,7 @@ import {
     TouchableOpacity,
     Image,
     StyleSheet,
-    ActivityIndicator, // Thêm ActivityIndicator cho hiệu ứng loading
+    ActivityIndicator,
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { Plant } from '../Common/types';
@@ -17,7 +17,7 @@ interface PlantDetailModalProps {
     handleClosePlantDetail: () => void;
     openEditModal: () => void;
     handleDeletePlant: () => void;
-    updatePlantPhoto: (photoUri: string) => void; // Hàm truyền vào để cập nhật ảnh
+    updatePlantPhoto: (photoUri: string) => void;
 }
 
 const PlantDetailModal: React.FC<PlantDetailModalProps> = ({
@@ -25,25 +25,41 @@ const PlantDetailModal: React.FC<PlantDetailModalProps> = ({
     handleClosePlantDetail,
     openEditModal,
     handleDeletePlant,
-    updatePlantPhoto, // Nhận hàm update ảnh từ component cha
+    updatePlantPhoto,
 }) => {
-    const [photoUri, setPhotoUri] = useState<string | null>(selectedPlant?.photoUri || null);
-    const [isLoading, setIsLoading] = useState(false); // Trạng thái loading khi thay đổi ảnh
+    const [photoUri, setPhotoUri] = useState<string | null>(null);
+    const [isLoading, setIsLoading] = useState(false);
+    const [currentPlantId, setCurrentPlantId] = useState<string | null>(null);
+
+    // Reset photoUri when modal closes
+    const handleClose = () => {
+        setPhotoUri(null);
+        setCurrentPlantId(null);
+        handleClosePlantDetail();
+    };
+
+    // Update photoUri when selectedPlant changes or when modal opens
+    useEffect(() => {
+        // Kiểm tra nếu cây đã thay đổi hoặc mới mở modal
+        if (selectedPlant && (!currentPlantId || currentPlantId !== selectedPlant.id)) {
+            setPhotoUri(selectedPlant.photoUri || selectedPlant.imageUri || null);
+            setCurrentPlantId(selectedPlant.id);
+        }
+    }, [selectedPlant, currentPlantId]);
 
     const handleChangeImage = async () => {
         try {
-            setIsLoading(true); // Bắt đầu loading khi chọn ảnh
+            setIsLoading(true);
             const result = await ImagePickerService.pickImageFromGallery();
-            if (result && result.uri) {
-                setPhotoUri(result.uri); // Cập nhật ảnh vào state modal
-                if (selectedPlant) {
-                    updatePlantPhoto(result.uri); // Gọi hàm update để cập nhật ảnh trong cây
-                }
+            if (result && result.uri && selectedPlant) {
+                const newUri = result.uri;
+                setPhotoUri(newUri);
+                updatePlantPhoto(newUri);
             }
         } catch (error) {
             console.log('Error while picking image: ', error);
         } finally {
-            setIsLoading(false); // Kết thúc loading
+            setIsLoading(false);
         }
     };
 
@@ -52,23 +68,23 @@ const PlantDetailModal: React.FC<PlantDetailModalProps> = ({
             visible={!!selectedPlant}
             animationType="fade"
             transparent
-            onRequestClose={handleClosePlantDetail}
+            onRequestClose={handleClose}
         >
             <View style={styles.overlay}>
                 <View style={styles.modalContainer}>
                     <View style={styles.header}>
                         <Text style={styles.plantName}>{selectedPlant?.name}</Text>
-                        <TouchableOpacity onPress={handleClosePlantDetail}>
+                        <TouchableOpacity onPress={handleClose}>
                             <MaterialIcons name="close" size={28} color="#10B981" />
                         </TouchableOpacity>
                     </View>
 
                     <View style={styles.imageContainer}>
                         {isLoading ? (
-                            <ActivityIndicator size="large" color="#10B981" /> // Hiển thị loading
+                            <ActivityIndicator size="large" color="#10B981" /> 
                         ) : photoUri ? (
                             <Image
-                                source={{ uri: photoUri }} // Hiển thị ảnh mới chọn
+                                source={{ uri: photoUri }}
                                 style={styles.plantImage}
                                 resizeMode="cover"
                             />

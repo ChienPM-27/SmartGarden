@@ -1,7 +1,10 @@
 import * as ImagePicker from 'expo-image-picker';
 
 // Request permission helper function
-const requestPermission = async (permissionFunc: () => Promise<ImagePicker.PermissionResponse>, permissionType: string) => {
+const requestPermission = async (
+  permissionFunc: () => Promise<ImagePicker.PermissionResponse>, 
+  permissionType: string
+) => {
   const permissionResult = await permissionFunc();
   if (!permissionResult.granted) {
     alert(`Permission to access ${permissionType} is required!`);
@@ -25,7 +28,6 @@ const pickImageFromGallery = async (): Promise<{ uri: string } | null> => {
     quality: 1,
   });
 
-  // Return uri if no cancellation, otherwise null
   return result.canceled ? null : { uri: result.assets[0]?.uri };
 };
 
@@ -43,7 +45,6 @@ const takePhotoWithCamera = async (): Promise<{ uri: string } | null> => {
     quality: 1,
   });
 
-  // Return uri if no cancellation, otherwise null
   return result.canceled ? null : { uri: result.assets[0]?.uri };
 };
 
