@@ -11,6 +11,7 @@ import {
 import { MaterialIcons } from '@expo/vector-icons';
 import { Plant } from '../Common/types';
 import ImagePickerService from '@/components/services/imagePickerService';
+import EditPlantModal from '../Plants/EditPLantModal';
 
 interface PlantDetailModalProps {
     selectedPlant: Plant | null;
@@ -18,6 +19,7 @@ interface PlantDetailModalProps {
     openEditModal: () => void;
     handleDeletePlant: () => void;
     updatePlantPhoto: (photoUri: string) => void;
+    handleSavePlant?: (updatedPlant: Plant) => void;
 }
 
 const PlantDetailModal: React.FC<PlantDetailModalProps> = ({
@@ -26,10 +28,12 @@ const PlantDetailModal: React.FC<PlantDetailModalProps> = ({
     openEditModal,
     handleDeletePlant,
     updatePlantPhoto,
+    handleSavePlant,
 }) => {
     const [photoUri, setPhotoUri] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [currentPlantId, setCurrentPlantId] = useState<string | null>(null);
+    const [editModalVisible, setEditModalVisible] = useState(false);
 
     // Reset photoUri when modal closes
     const handleClose = () => {
@@ -63,64 +67,102 @@ const PlantDetailModal: React.FC<PlantDetailModalProps> = ({
         }
     };
 
+    const handleOpenEditModal = () => {
+        setEditModalVisible(true);
+    };
+
+    const handleCloseEditModal = () => {
+        setEditModalVisible(false);
+    };
+
+    const handleSaveEdit = (updatedPlant: Plant) => {
+        if (handleSavePlant) {
+            handleSavePlant(updatedPlant);
+        }
+        setEditModalVisible(false);
+    };
+
     return (
-        <Modal
-            visible={!!selectedPlant}
-            animationType="fade"
-            transparent
-            onRequestClose={handleClose}
-        >
-            <View style={styles.overlay}>
-                <View style={styles.modalContainer}>
-                    <View style={styles.header}>
-                        <Text style={styles.plantName}>{selectedPlant?.name}</Text>
-                        <TouchableOpacity onPress={handleClose}>
-                            <MaterialIcons name="close" size={28} color="#10B981" />
+        <>
+            <Modal
+                visible={!!selectedPlant}
+                animationType="fade"
+                transparent
+                onRequestClose={handleClose}
+            >
+                <View style={styles.overlay}>
+                    <View style={styles.modalContainer}>
+                        <View style={styles.header}>
+                            <Text style={styles.plantName}>{selectedPlant?.name}</Text>
+                            <TouchableOpacity onPress={handleClose}>
+                                <MaterialIcons name="close" size={28} color="#10B981" />
+                            </TouchableOpacity>
+                        </View>
+
+                        <View style={styles.imageContainer}>
+                            {isLoading ? (
+                                <ActivityIndicator size="large" color="#10B981" /> 
+                            ) : photoUri ? (
+                                <Image
+                                    source={{ uri: photoUri }}
+                                    style={styles.plantImage}
+                                    resizeMode="cover"
+                                />
+                            ) : (
+                                <MaterialIcons name={selectedPlant?.icon} size={64} color="#10B981" />
+                            )}
+                        </View>
+
+                        <View style={styles.infoRow}>
+                            <Text style={styles.label}>🔬 Tên khoa học:</Text>
+                            <Text style={styles.value}>{selectedPlant?.scientificName || 'N/A'}</Text>
+                        </View>
+                        <View style={styles.infoRow}>
+                            <Text style={styles.label}>💧 Tưới nước:</Text>
+                            <Text style={styles.value}>{selectedPlant?.waterStatus || 'Chưa cập nhật'}</Text>
+                        </View>
+                        <View style={styles.infoRow}>
+                            <Text style={styles.label}>🌡️ Nhiệt độ:</Text>
+                            <Text style={styles.value}>{selectedPlant?.temperature || 'Chưa cập nhật'}</Text>
+                        </View>
+                        <View style={styles.infoRow}>
+                            <Text style={styles.label}>🌱 Loại cây:</Text>
+                            <Text style={styles.value}>{selectedPlant?.type || 'Chưa cập nhật'}</Text>
+                        </View>
+                        <View style={styles.infoRow}>
+                            <Text style={styles.label}>📊 Tiến độ:</Text>
+                            <Text style={styles.value}>{selectedPlant?.progress || 'Chưa cập nhật'}</Text>
+                        </View>
+                        <View style={styles.infoRow}>
+                            <Text style={styles.label}>📝 Mô tả:</Text>
+                            <Text style={styles.value}>{selectedPlant?.description || 'Chưa cập nhật'}</Text>
+                        </View>
+
+                        <View style={styles.buttonContainer}>
+                            <TouchableOpacity style={styles.editButton} onPress={handleOpenEditModal}>
+                                <Text style={styles.buttonText}>Edit</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity style={styles.deleteButton} onPress={handleDeletePlant}>
+                                <Text style={styles.buttonText}>Delete</Text>
+                            </TouchableOpacity>
+                        </View>
+
+                        <TouchableOpacity style={styles.addButton} onPress={handleChangeImage}>
+                            <Text style={styles.buttonText}>Add / Change picture</Text>
                         </TouchableOpacity>
                     </View>
-
-                    <View style={styles.imageContainer}>
-                        {isLoading ? (
-                            <ActivityIndicator size="large" color="#10B981" /> 
-                        ) : photoUri ? (
-                            <Image
-                                source={{ uri: photoUri }}
-                                style={styles.plantImage}
-                                resizeMode="cover"
-                            />
-                        ) : (
-                            <MaterialIcons name={selectedPlant?.icon} size={64} color="#10B981" />
-                        )}
-                    </View>
-
-                    <View style={styles.infoRow}>
-                        <Text style={styles.label}>🔬 Tên khoa học:</Text>
-                        <Text style={styles.value}>{selectedPlant?.scientificName || 'N/A'}</Text>
-                    </View>
-                    <View style={styles.infoRow}>
-                        <Text style={styles.label}>💧 Tưới nước:</Text>
-                        <Text style={styles.value}>{selectedPlant?.waterStatus || 'Chưa cập nhật'}</Text>
-                    </View>
-                    <View style={styles.infoRow}>
-                        <Text style={styles.label}>🌡️ Nhiệt độ:</Text>
-                        <Text style={styles.value}>{selectedPlant?.temperature || 'Chưa cập nhật'}</Text>
-                    </View>
-
-                    <View style={styles.buttonContainer}>
-                        <TouchableOpacity style={styles.editButton} onPress={openEditModal}>
-                            <Text style={styles.buttonText}>Chỉnh sửa</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity style={styles.deleteButton} onPress={handleDeletePlant}>
-                            <Text style={styles.buttonText}>Xóa</Text>
-                        </TouchableOpacity>
-                    </View>
-
-                    <TouchableOpacity style={styles.addButton} onPress={handleChangeImage}>
-                        <Text style={styles.buttonText}>Thêm / Đổi ảnh</Text>
-                    </TouchableOpacity>
                 </View>
-            </View>
-        </Modal>
+            </Modal>
+            
+            {selectedPlant && (
+                <EditPlantModal 
+                    visible={editModalVisible}
+                    plant={selectedPlant}
+                    onClose={handleCloseEditModal}
+                    onSave={handleSaveEdit}
+                />
+            )}
+        </>
     );
 };
 
@@ -152,10 +194,11 @@ const styles = StyleSheet.create({
     },
     imageContainer: {
         marginVertical: 10,
+        marginTop: -5,
     },
     plantImage: {
-        width: 150,
-        height: 100,
+        width: 260,
+        height: 180,
         borderRadius: 12,
     },
     infoRow: {
@@ -170,6 +213,8 @@ const styles = StyleSheet.create({
     },
     value: {
         color: '#14532D',
+        maxWidth: '60%',
+        textAlign: 'right',
     },
     buttonContainer: {
         flexDirection: 'row',

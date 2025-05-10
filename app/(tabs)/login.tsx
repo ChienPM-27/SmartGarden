@@ -26,14 +26,14 @@ export default function LoginScreen() {
         setUsername('');
         setPassword('');
         setErrorMessage('');
-        router.push('/(tabs)/create-account');
+        router.push('/create-account');
     };
 
     const handleNavigateForgotPassword = () => {
         setUsername('');
         setPassword('');
         setErrorMessage('');
-        router.push('/(tabs)/forgot-password');
+        router.push('/forgot-password');
     };
 
     const handleNavigateLogin = () => {

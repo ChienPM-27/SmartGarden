@@ -15,6 +15,6 @@ export default function RootLayout() {
       name="(Main)"
       options={{ headerShown: false }}
       />
-  </Stack>
+    </Stack>
 
 }

@@ -3,19 +3,27 @@ import {
   SafeAreaView,
   View,
   Text,
-  FlatList,
-  TouchableOpacity,
   StyleSheet,
+  Pressable,
+  TouchableOpacity,
+  Image,
 } from 'react-native';
+import { useFonts } from 'expo-font';
 import { Plant, initialPlantsData } from '@/components/Common/types';
 import SearchBar from '@/components/Plants/SearchBar';
 import FilterModal from '@/components/Plants/FilterModal';
 import PlantDetailModal from '@/components/Plants/PlantDetailModal';
 import NavigationBar from '@/components/Common/NavigationBar';
-import { MaterialIcons } from '@expo/vector-icons';
 import PlantList from '@/components/Plants/PlantList';
+import AddPlantModal from '@/components/Plants/AddPlantModal';
+import { router } from 'expo-router';
+
+const images = {
+  logo: require('@/assets/icons/logo.png'), // Cập nhật đường dẫn đúng đến logo của bạn
+};
 
 const SmartGardenHome = () => {
+  
   const [plants, setPlants] = useState<Plant[]>(initialPlantsData);
   const [searchText, setSearchText] = useState('');
   const [filterCriteria, setFilterCriteria] = useState('');
@@ -24,15 +32,6 @@ const SmartGardenHome = () => {
   const [selectedPlant, setSelectedPlant] = useState<Plant | null>(null);
   const [editModalVisible, setEditModalVisible] = useState(false);
   const [editingPlant, setEditingPlant] = useState<Plant | null>(null);
-  const [newPlant, setNewPlant] = useState<Plant>({
-    id: '',
-    name: '',
-    description: '',
-    icon: 'grass',
-    type: '',
-    progress: '',
-    photoUri: undefined,
-  });
 
   // Cập nhật danh sách cây theo tìm kiếm và lọc mỗi khi searchText hoặc filterCriteria thay đổi
   useEffect(() => {
@@ -53,6 +52,11 @@ const SmartGardenHome = () => {
     setPlants(filtered);
   }, [searchText, filterCriteria]);
 
+  const handleNavigateProfile = () => {
+        router.push('./profile');
+    };
+
+
   // Hàm tìm kiếm (cập nhật searchText)
   const handleSearch = (text: string) => {
     setSearchText(text);
@@ -70,7 +74,7 @@ const SmartGardenHome = () => {
 
   // Đóng modal chi tiết
   const handleClosePlantDetail = () => {
-  setSelectedPlant(null);
+    setSelectedPlant(null);
   };
 
   // Mở modal chỉnh sửa
@@ -82,21 +86,22 @@ const SmartGardenHome = () => {
   };
 
   // Lưu chỉnh sửa cây
-  const handleSaveEdit = () => {
-    if (!editingPlant?.name.trim()) {
-      alert('Vui lòng nhập tên cây');
-      return;
-    }
-    setPlants(plants.map((p) => (p.id === editingPlant?.id ? editingPlant : p)));
-    setSelectedPlant(editingPlant);
-    setEditModalVisible(false);
+  const handleSavePlant = (updatedPlant: Plant) => {
+    // Cập nhật danh sách cây với thông tin đã chỉnh sửa
+    setPlants(plants.map((p) => (p.id === updatedPlant.id ? updatedPlant : p)));
+    
+    // Cập nhật cây đang chọn để hiển thị thông tin mới trong modal chi tiết
+    setSelectedPlant(updatedPlant);
+    
+    // Cập nhật cây đang chỉnh sửa
+    setEditingPlant(null);
   };
 
   // Xóa cây
   const handleDeletePlant = () => {
     if (!selectedPlant) return;
-      setPlants(plants.filter((p) => p.id !== selectedPlant.id));
-      handleClosePlantDetail(); // Sử dụng hàm đóng modal mới
+    setPlants(plants.filter((p) => p.id !== selectedPlant.id));
+    handleClosePlantDetail();
   };
 
   // Hàm cập nhật ảnh cây trồng
@@ -110,39 +115,51 @@ const SmartGardenHome = () => {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#DCFCE7' }}>
-      <View
+        <View
+      style={{
+        paddingHorizontal: 20,  // Thêm khoảng cách trái/phải cho thoáng
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingVertical: 15,
+      }}
+    >
+      <Text
         style={{
-          padding: 16,
-          flexDirection: 'row',
-          justifyContent: 'space-between',
+          fontWeight: 'bold',
+          fontSize: 35,
+          color: '#166534',
+          flex: 1,
+          marginLeft: 5,
         }}
       >
-        <View>
-          <Text style={{ fontWeight: 'bold', fontSize: 40, color: '#166534' }}>
-            Smart
-          </Text>
-          <Text style={{ fontWeight: 'bold', fontSize: 40, color: '#166534' }}>
-            Garden
-          </Text>
-        </View>
-        <View
-          style={{
-            position: 'absolute',
-            right: 8,
-            top: 16,
-            width: 60,
-            height: 60,
-            backgroundColor: '#FFFFFF',
-            borderRadius: 30,
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-          accessible={true}
-          accessibilityLabel="Star icon"
-        >
-          <Text style={{ fontSize: 40 }}>🌟</Text>
-        </View>
-      </View>
+        Smart Garden
+      </Text>
+      <Pressable
+        onPress={handleNavigateProfile}
+        accessible
+        accessibilityLabel="Logo"
+        style={{
+          width: 45,  // Kích thước vừa phải để nhìn đẹp mắt
+          height: 45,
+          backgroundColor: 'white',
+          borderRadius: 30,  // Tạo hình tròn hoàn hảo
+          justifyContent: 'center',
+          alignItems: 'center',
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 1 },
+          shadowOpacity: 0.3,
+          shadowRadius: 3,
+        }}
+      >
+        <Image
+          source={images.logo}  // Sử dụng logo của bạn
+          style={{ width: 30, height: 30 }}  // Điều chỉnh kích thước logo
+        />
+      </Pressable>
+    </View>
+
+
 
       <SearchBar
         searchText={searchText}
@@ -170,6 +187,7 @@ const SmartGardenHome = () => {
         openEditModal={openEditModal}
         handleDeletePlant={handleDeletePlant}
         updatePlantPhoto={updatePlantPhoto}
+        handleSavePlant={handleSavePlant}
       />
 
       <View

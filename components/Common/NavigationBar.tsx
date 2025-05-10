@@ -1,78 +1,178 @@
-import React from 'react';
-import { View, TouchableOpacity, Text, StyleSheet } from 'react-native';
-import { MaterialIcons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
+    import React, { useState } from 'react';
+    import {
+        Alert,
+        Animated,
+        StyleSheet,
+        TouchableOpacity,
+        View,
+        Dimensions,
+    } from 'react-native';
+    import { CurvedBottomBarExpo } from 'react-native-curved-bottom-bar';
+    import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+    import { useRouter } from 'expo-router';
 
-export default function NavigationBar() {
-    const router = useRouter();
+    const { height: screenHeight } = Dimensions.get('window');
 
-    const handleNavigateHome = () => {
-        router.push('/(Main)/Home');
+    const NavigationBar = () => {
+        const router = useRouter();
+        const [selectedTab, setSelectedTab] = useState('home');
+
+        const _renderIcon = (routeName: string, selectedTab: string) => {
+            let icon = '';
+            switch (routeName) {
+                case 'home':
+                    icon = 'home';
+                    break;
+                case 'my-plants':
+                    icon = 'list';
+                    break;
+                case 'chat-box':
+                    icon = 'chat';
+                    break;
+                case 'setting':
+                    icon = 'person';
+                    break;
+            }
+            return (
+                <MaterialIcons
+                    name={icon}
+                    size={25}
+                    color={routeName === selectedTab ? '#10B981' : '#808080'}
+                />
+            );
+        };
+
+        const renderTabBar = ({ routeName, selectedTab, navigate }: any) => {
+            return (
+                <TouchableOpacity
+                    onPress={() => {
+                        setSelectedTab(routeName);
+                        switch (routeName) {
+                            case 'home':
+                                router.push('/(Main)/Home');
+                                break;
+                            case 'my-plants':
+                                router.push('/(Main)/my-plants');
+                                break;
+                            case 'chat-box':
+                                router.push('/(Main)/chat-box');
+                                break;
+                            case 'setting':
+                                router.push('/(Main)/setting');
+                                break;
+                        }
+                    }}
+                    style={styles.tabbarItem}
+                >
+                    {_renderIcon(routeName, selectedTab)}
+                </TouchableOpacity>
+            );
+        };
+
+        return (
+            <>
+                <CurvedBottomBarExpo.Navigator
+                    type="DOWN"
+                    style={styles.bottomBar}
+                    shadowStyle={styles.shadow}
+                    height={60}
+                    circleWidth={60}
+                    bgColor="white"
+                    initialRouteName="home"
+                    borderTopLeftRight
+                    renderCircle={({ selectedTab, navigate }) => (
+                        <Animated.View style={styles.btnCircleUp}>
+                            <TouchableOpacity
+                                style={styles.button}
+                                onPress={() => Alert.alert('Action Button Clicked!')}
+                            >
+                                <MaterialIcons name="camera" color="gray" size={30} />
+                            </TouchableOpacity>
+                        </Animated.View>
+                    )}
+                    tabBar={renderTabBar}
+                >
+                    <CurvedBottomBarExpo.Screen
+                        name="home"
+                        position="LEFT"
+                        component={() => <View style={styles.screen1} />}
+                    />
+                    <CurvedBottomBarExpo.Screen
+                        name="my-plants"
+                        position="LEFT"
+                        component={() => <View style={styles.screen2} />}
+                    />
+                    <CurvedBottomBarExpo.Screen
+                        name="chat-box"
+                        position="RIGHT"
+                        component={() => <View style={styles.screen1} />}
+                    />
+                    <CurvedBottomBarExpo.Screen
+                        name="setting"
+                        position="RIGHT"
+                        component={() => <View style={styles.screen2} />}
+                    />
+                </CurvedBottomBarExpo.Navigator>
+                <View style={styles.bottomSpacer} />
+            </>
+        );
     };
 
-    const handleNavigateMyPlant = () => {
-        router.push('/(Main)/my-plants');
-    };
+    const styles = StyleSheet.create({
+        shadow: {
+            shadowColor: '#DDDDDD',
+            shadowOffset: {
+                width: 0,
+                height: 0,
+            },
+            shadowOpacity: 1,
+            shadowRadius: 5,
+        },
+        button: {
+            flex: 1,
+            justifyContent: 'center',
+        },
+        bottomBar: {
+            position: 'absolute',
+            left: 0,
+            right: 0,
+            bottom: 0,
+            borderTopWidth: 0,
+        },
+        btnCircleUp: {
+            width: 67,
+            height: 67,
+            borderRadius: 40,
+            alignItems: 'center',
+            justifyContent: 'center',
+            backgroundColor: '#E8E8E8',
+            bottom: 35,
+            shadowColor: '#000',
+            shadowOffset: {
+                width: 0,
+                height: 1,
+            },
+            shadowOpacity: 0.2,
+            shadowRadius: 1.41,
+            elevation: 1,
+        },
+        tabbarItem: {
+            flex: 1,
+            alignItems: 'center',
+            justifyContent: 'center',
+        },
+        screen1: {
+            flex: 1,
+            backgroundColor: '#BFEFFF',
+        },
+        screen2: {
+            flex: 1,
+            backgroundColor: '#FFEBCD',
+        },
+        bottomSpacer: {
+            height: 10,
+            backgroundColor: 'white',
+        },
+    });
 
-    const handleNavigateSetting = () => {
-        router.push('/(Main)/setting');
-    };
-
-    const handleNavigateChatBox = () => {
-        router.push('/(Main)/chat-box');
-    };
-
-    return (
-        <View style={styles.buttonContainer}>
-            <TouchableOpacity onPress={handleNavigateHome}>
-                <MaterialIcons name="home" style={{left : 8, fontSize : 30}} size={24} color="#FFFFFF" />
-                <Text style={styles.buttonText}>Home</Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={handleNavigateMyPlant}>
-                <MaterialIcons name="list" style={{left : 20, fontSize : 30}} size={24} color="#FFFFFF" />
-                <Text style={styles.buttonText}>My Plants</Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={handleNavigateChatBox}>
-                <MaterialIcons name="chat" style={{left : 17, fontSize : 30}} size={24} color="#FFFFFF" />
-                <Text style={styles.buttonText}>ChatBox</Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={handleNavigateSetting}>
-                <MaterialIcons name="settings" style={{left : 15, fontSize : 30}} size={24} color="#FFFFFF" />
-                <Text style={styles.buttonText}>Settings</Text>
-            </TouchableOpacity>
-        </View>
-    );
-}
-
-const styles = StyleSheet.create({
-    buttonContainer: {
-        flexDirection: 'row',
-        justifyContent: 'space-around',
-        alignItems: 'center',
-        backgroundColor: '#10B981',
-        borderTopLeftRadius: 30,
-        borderTopRightRadius: 30,
-        paddingVertical: 20,  // Giảm padding để đưa thanh lên cao hơn
-        paddingHorizontal: 10,
-        position: 'absolute',
-        bottom: 0,
-        left: 0,
-        right: 0,
-        elevation: 5, // For Android shadow
-        shadowColor: '#000', // For iOS shadow
-        shadowOffset: { width: 0, height: -2 },
-        shadowOpacity: 0.2,
-        shadowRadius: 4,
-        marginBottom: 0,  // Tạo khoảng cách từ dưới màn hình
-    },
-    buttonText: {
-        color: '#FFFFFF',
-        fontWeight: 'bold',
-        marginTop: 5,
-    },
-    icon: {
-      color: '#FFFFFF',
-        fontWeight: 'bold',
-        marginTop: 5,
-    },
-});
+    export default NavigationBar;

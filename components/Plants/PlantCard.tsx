@@ -19,10 +19,11 @@ const PlantCard: React.FC<PlantCardProps> = ({ plant, handleOpenPlantDetail }) =
         <Image
           source={{ uri: plant.photoUri || plant.imageUri }}
           style={styles.plantImage}
+          resizeMode="cover" // Lấp đầy toàn bộ khung ảnh
         />
       ) : (
         <View style={styles.noImageContainer}>
-          <MaterialIcons name={plant.icon} size={40} color="#4ADE80" />
+          <MaterialIcons name={plant.icon} size={30} color="#4ADE80" />
         </View>
       )}
 
@@ -54,27 +55,36 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     marginVertical: 8,
     marginHorizontal: 16,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    borderBottomLeftRadius: 0,
-    borderBottomRightRadius: 0,
+    borderRadius: 20,
     overflow: 'hidden',
     elevation: 2,
   },
   plantImage: {
     width: '100%',
-    height: 150,
+    height: 200, // Tăng chiều cao cho cân đối hơn
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
   },
   noImageContainer: {
     width: '100%',
-    height: 150,
+    height: 200,
     backgroundColor: '#F3F4F6',
     justifyContent: 'center',
     alignItems: 'center',
   },
   infoContainer: {
-    padding: 12,
+    position: 'absolute',
+    bottom: 5,
+    left: 20,
+    right: 20,
     backgroundColor: '#DCFCE7',
+    paddingVertical: 8,
+    paddingHorizontal: 10,
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    marginBottom: 10,
   },
   row: {
     flexDirection: 'row',
@@ -83,11 +93,13 @@ const styles = StyleSheet.create({
   },
   label: {
     color: '#065F46',
-    fontWeight: '600',
+    fontWeight: '500',
+    fontSize: 12,
   },
   value: {
     color: '#14532D',
-    fontWeight: '500',
+    fontWeight: '400',
+    fontSize: 12,
   },
 });
 
