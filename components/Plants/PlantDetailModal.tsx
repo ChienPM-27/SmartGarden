@@ -7,11 +7,13 @@ import {
     Image,
     StyleSheet,
     ActivityIndicator,
+    Alert,
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { Plant } from '../Common/types';
 import ImagePickerService from '@/components/services/imagePickerService';
 import EditPlantModal from '../Plants/EditPLantModal';
+import StorageService from '@/components/services/storageService';
 
 interface PlantDetailModalProps {
     selectedPlant: Plant | null;
@@ -19,7 +21,7 @@ interface PlantDetailModalProps {
     openEditModal: () => void;
     handleDeletePlant: () => void;
     updatePlantPhoto: (photoUri: string) => void;
-    handleSavePlant?: (updatedPlant: Plant) => void;
+    handleSavePlant: (updatedPlant: Plant) => void;
 }
 
 const PlantDetailModal: React.FC<PlantDetailModalProps> = ({
@@ -62,6 +64,7 @@ const PlantDetailModal: React.FC<PlantDetailModalProps> = ({
             }
         } catch (error) {
             console.log('Error while picking image: ', error);
+            Alert.alert('Lỗi', 'Không thể chọn ảnh. Vui lòng thử lại.');
         } finally {
             setIsLoading(false);
         }
@@ -75,11 +78,19 @@ const PlantDetailModal: React.FC<PlantDetailModalProps> = ({
         setEditModalVisible(false);
     };
 
-    const handleSaveEdit = (updatedPlant: Plant) => {
-        if (handleSavePlant) {
+    const handleSaveEdit = async (updatedPlant: Plant) => {
+        try {
+            // Gọi hàm cập nhật từ props được truyền từ component cha
             handleSavePlant(updatedPlant);
+            
+            // Đóng modal chỉnh sửa
+            setEditModalVisible(false);
+            
+            Alert.alert('Thành công', 'Thông tin cây đã được cập nhật');
+        } catch (error) {
+            console.error('Lỗi khi lưu thông tin cây:', error);
+            Alert.alert('Lỗi', 'Không thể cập nhật thông tin cây. Vui lòng thử lại.');
         }
-        setEditModalVisible(false);
     };
 
     return (
@@ -140,15 +151,15 @@ const PlantDetailModal: React.FC<PlantDetailModalProps> = ({
 
                         <View style={styles.buttonContainer}>
                             <TouchableOpacity style={styles.editButton} onPress={handleOpenEditModal}>
-                                <Text style={styles.buttonText}>Edit</Text>
+                                <Text style={styles.buttonText}>Chỉnh sửa</Text>
                             </TouchableOpacity>
                             <TouchableOpacity style={styles.deleteButton} onPress={handleDeletePlant}>
-                                <Text style={styles.buttonText}>Delete</Text>
+                                <Text style={styles.buttonText}>Xóa</Text>
                             </TouchableOpacity>
                         </View>
 
                         <TouchableOpacity style={styles.addButton} onPress={handleChangeImage}>
-                            <Text style={styles.buttonText}>Add / Change picture</Text>
+                            <Text style={styles.buttonText}>Thêm / Thay đổi ảnh</Text>
                         </TouchableOpacity>
                     </View>
                 </View>
@@ -195,6 +206,13 @@ const styles = StyleSheet.create({
     imageContainer: {
         marginVertical: 10,
         marginTop: -5,
+        width: 260,
+        height: 180,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: '#F3F4F6',
+        borderRadius: 12,
+        overflow: 'hidden',
     },
     plantImage: {
         width: 260,

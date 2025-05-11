@@ -4,55 +4,51 @@ import {
     View,
     Text,
     TouchableOpacity,
-    Image,
     TextInput,
     StyleSheet,
-    ActivityIndicator,
     ScrollView,
+    Alert,
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
-import ImagePickerService from '@/components/services/imagePickerService';
 import { Plant } from '../Common/types';
 
 type MaterialIconName = keyof typeof MaterialIcons.glyphMap;
 
 interface EditPlantModalProps {
     visible: boolean;
-    plantData: Plant;
-    handleCloseEditPlant: () => void;
-    handleUpdatePlant: (updatedPlant: Plant) => void;
+    plant: Plant;
+    onClose: () => void;
+    onSave: (updatedPlant: Plant) => void;
 }
 
 const EditPlantModal: React.FC<EditPlantModalProps> = ({
     visible,
-    plantData,
-    handleCloseEditPlant,
-    handleUpdatePlant,
+    plant,
+    onClose,
+    onSave,
 }) => {
-    const [name, setName] = useState(plantData.name);
-    const [scientificName, setScientificName] = useState(plantData.scientificName || '');
-    const [waterStatus, setWaterStatus] = useState(plantData.waterStatus || '');
-    const [temperature, setTemperature] = useState(plantData.temperature || '');
-    const [type, setType] = useState(plantData.type);
-    const [progress, setProgress] = useState(plantData.progress);
-    const [description, setDescription] = useState(plantData.description);
-    const [photoUri, setPhotoUri] = useState<string | null>(plantData.photoUri || null);
-    const [iconInput, setIconInput] = useState<string>(plantData.icon);
-    const [isLoadingImage, setIsLoadingImage] = useState(false);
+    const [name, setName] = useState('');
+    const [scientificName, setScientificName] = useState('');
+    const [waterStatus, setWaterStatus] = useState('');
+    const [temperature, setTemperature] = useState('');
+    const [type, setType] = useState('');
+    const [progress, setProgress] = useState('');
+    const [description, setDescription] = useState('');
+    const [iconInput, setIconInput] = useState('');
 
-    const handleChangeImage = async () => {
-        try {
-            setIsLoadingImage(true);
-            const result = await ImagePickerService.pickImageFromGallery();
-            if (result && result.uri) {
-                setPhotoUri(result.uri);
-            }
-        } catch (error) {
-            console.log('Error while picking image: ', error);
-        } finally {
-            setIsLoadingImage(false);
+    // Initialize form with plant data when modal opens
+    useEffect(() => {
+        if (visible && plant) {
+            setName(plant.name || '');
+            setScientificName(plant.scientificName || '');
+            setWaterStatus(plant.waterStatus || '');
+            setTemperature(plant.temperature || '');
+            setType(plant.type || '');
+            setProgress(plant.progress || '');
+            setDescription(plant.description || '');
+            setIconInput(plant.icon || 'eco');
         }
-    };
+    }, [visible, plant]);
 
     const handleSave = () => {
         if (!name.trim()) {
@@ -60,21 +56,19 @@ const EditPlantModal: React.FC<EditPlantModalProps> = ({
             return;
         }
 
-        const updatedPlantData: Plant = {
-            ...plantData,
+        const updatedPlant: Plant = {
+            ...plant,
             name: name.trim(),
-            scientificName: scientificName.trim(),
-            waterStatus: waterStatus.trim(),
-            temperature: temperature.trim(),
+            scientificName: scientificName.trim() || undefined,
+            waterStatus: waterStatus.trim() || undefined,
+            temperature: temperature.trim() || undefined,
             type: type.trim(),
             progress: progress.trim(),
             description: description.trim(),
-            photoUri: photoUri || undefined,
-            icon: iconInput.trim() as MaterialIconName,
+            icon: (iconInput.trim() || 'eco') as MaterialIconName,
         };
 
-        handleUpdatePlant(updatedPlantData);
-        handleCloseEditPlant();
+        onSave(updatedPlant);
     };
 
     return (
@@ -82,57 +76,107 @@ const EditPlantModal: React.FC<EditPlantModalProps> = ({
             visible={visible}
             animationType="fade"
             transparent
-            onRequestClose={handleCloseEditPlant}
+            onRequestClose={onClose}
         >
             <View style={styles.overlay}>
                 <View style={styles.modalContainer}>
-                    <ScrollView style={{ width: '100%' }} contentContainerStyle={styles.scrollViewContent}>
+                    <ScrollView style={{width: '100%'}} contentContainerStyle={styles.scrollViewContent}>
                         <View style={styles.header}>
-                            <Text style={styles.modalTitle}>Chỉnh sửa cây trồng</Text>
-                            <TouchableOpacity onPress={handleCloseEditPlant}>
+                            <Text style={styles.modalTitle}>Chỉnh sửa cây</Text>
+                            <TouchableOpacity onPress={onClose}>
                                 <MaterialIcons name="close" size={28} color="#10B981" />
                             </TouchableOpacity>
                         </View>
 
-                        <View style={styles.imageContainer}>
-                            {isLoadingImage ? (
-                                <ActivityIndicator size="large" color="#10B981" />
-                            ) : photoUri ? (
-                                <Image
-                                    source={{ uri: photoUri }}
-                                    style={styles.plantImage}
-                                    resizeMode="cover"
-                                />
-                            ) : (
-                                <MaterialIcons name="image" size={64} color="#A1A1AA" />
-                            )}
+                        <View style={styles.infoRow}>
+                            <Text style={styles.label}>🪴 Tên cây:</Text>
+                            <TextInput
+                                style={styles.valueInput}
+                                placeholder="Bắt buộc"
+                                placeholderTextColor="#A1A1AA"
+                                value={name}
+                                onChangeText={setName}
+                            />
                         </View>
-                        <TouchableOpacity style={styles.actionButtonFullWidth} onPress={handleChangeImage}>
-                            <Text style={styles.buttonText}>{photoUri ? 'Thay đổi hình ảnh' : 'Thêm hình ảnh'}</Text>
-                        </TouchableOpacity>
-
+                        <View style={styles.infoRow}>
+                            <Text style={styles.label}>🔬 Tên khoa học:</Text>
+                            <TextInput
+                                style={styles.valueInput}
+                                placeholder="Không bắt buộc"
+                                placeholderTextColor="#A1A1AA"
+                                value={scientificName}
+                                onChangeText={setScientificName}
+                            />
+                        </View>
+                        <View style={styles.infoRow}>
+                            <Text style={styles.label}>💧 Tưới nước:</Text>
+                            <TextInput
+                                style={styles.valueInput}
+                                placeholder="VD: 2 lần/tuần"
+                                placeholderTextColor="#A1A1AA"
+                                value={waterStatus}
+                                onChangeText={setWaterStatus}
+                            />
+                        </View>
+                        <View style={styles.infoRow}>
+                            <Text style={styles.label}>🌡️ Nhiệt độ:</Text>
+                            <TextInput
+                                style={styles.valueInput}
+                                placeholder="VD: 20-25°C"
+                                placeholderTextColor="#A1A1AA"
+                                value={temperature}
+                                onChangeText={setTemperature}
+                            />
+                        </View>
                         <View style={styles.infoRow}>
                             <Text style={styles.label}>🌱 Loại cây:</Text>
-                            <TextInput style={styles.valueInput} value={type} onChangeText={setType} />
+                            <TextInput
+                                style={styles.valueInput}
+                                placeholder="Bắt buộc"
+                                placeholderTextColor="#A1A1AA"
+                                value={type}
+                                onChangeText={setType}
+                            />
                         </View>
                         <View style={styles.infoRow}>
                             <Text style={styles.label}>📊 Tiến độ:</Text>
-                            <TextInput style={styles.valueInput} value={progress} onChangeText={setProgress} />
+                            <TextInput
+                                style={styles.valueInput}
+                                placeholder="Bắt buộc"
+                                placeholderTextColor="#A1A1AA"
+                                value={progress}
+                                onChangeText={setProgress}
+                            />
                         </View>
                         <View style={styles.infoRow}>
                             <Text style={styles.label}>📝 Mô tả:</Text>
-                            <TextInput style={[styles.valueInput, styles.multilineInput]} value={description} onChangeText={setDescription} multiline numberOfLines={3} />
+                            <TextInput
+                                style={[styles.valueInput, styles.multilineInput]}
+                                placeholder="Bắt buộc"
+                                placeholderTextColor="#A1A1AA"
+                                value={description}
+                                onChangeText={setDescription}
+                                multiline
+                                numberOfLines={3}
+                            />
                         </View>
                         <View style={styles.infoRow}>
                             <Text style={styles.label}>🏷️ Icon (tên):</Text>
-                            <TextInput style={styles.valueInput} value={iconInput} onChangeText={setIconInput} autoCapitalize="none" />
+                            <TextInput
+                                style={styles.valueInput}
+                                placeholder="VD: eco, local-florist"
+                                placeholderTextColor="#A1A1AA"
+                                value={iconInput}
+                                onChangeText={setIconInput}
+                                autoCapitalize="none"
+                            />
                         </View>
 
                         <View style={styles.buttonContainer}>
                             <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
                                 <Text style={styles.buttonText}>Lưu thay đổi</Text>
                             </TouchableOpacity>
-                            <TouchableOpacity style={styles.cancelButton} onPress={handleCloseEditPlant}>
+                            <TouchableOpacity style={styles.cancelButton} onPress={onClose}>
                                 <Text style={styles.buttonText}>Hủy</Text>
                             </TouchableOpacity>
                         </View>
@@ -142,8 +186,6 @@ const EditPlantModal: React.FC<EditPlantModalProps> = ({
         </Modal>
     );
 };
-
-export default EditPlantModal;
 
 const styles = StyleSheet.create({
     overlay: {
@@ -182,29 +224,6 @@ const styles = StyleSheet.create({
         fontSize: 22,
         fontWeight: 'bold',
         color: '#14532D',
-    },
-    imageContainer: {
-        width: 200,
-        height: 150,
-        borderRadius: 12,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: '#F3F4F6',
-        marginVertical: 15,
-        overflow: 'hidden',
-    },
-    plantImage: {
-        width: '100%',
-        height: '100%',
-    },
-    actionButtonFullWidth: {
-        backgroundColor: '#10B981',
-        paddingVertical: 12,
-        borderRadius: 8,
-        marginTop: 0,
-        marginBottom: 20,
-        width: '100%',
-        alignItems: 'center',
     },
     infoRow: {
         flexDirection: 'row',
@@ -270,3 +289,5 @@ const styles = StyleSheet.create({
         fontSize: 16,
     },
 });
+
+export default EditPlantModal;
