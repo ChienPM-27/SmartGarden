@@ -13,7 +13,7 @@ import {
 import { MaterialIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { Plant } from '@/components/Common/types';
-import PlantDetailModal from '@/components/Plants/PlantDetailModal';
+import PlantDetailModal from '@/components/Plants/PlantDetail/PlantDetailModal';
 import NavigationBar from '@/components/Common/NavigationBar';
 import StorageService from '@/components/services/storageService';
 

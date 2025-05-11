@@ -13,7 +13,7 @@ import { useFonts } from 'expo-font';
 import { Plant, initialPlantsData } from '@/components/Common/types';
 import SearchBar from '@/components/Plants/SearchBar';
 import FilterModal from '@/components/Plants/FilterModal';
-import PlantDetailModal from '@/components/Plants/PlantDetailModal';
+import PlantDetailModal from '@/components/Plants/PlantDetail/PlantDetailModal';
 import NavigationBar from '@/components/Common/NavigationBar';
 import PlantList from '@/components/Plants/PlantList';
 import AddPlantModal from '@/components/Plants/AddPlantModal';

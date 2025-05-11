@@ -58,7 +58,7 @@
                                 router.push('/(Main)/chat-box');
                                 break;
                             case 'setting':
-                                router.push('/(Main)/setting');
+                                router.push('/(Main)/community');
                                 break;
                         }
                     }}
@@ -75,8 +75,8 @@
                     type="DOWN"
                     style={styles.bottomBar}
                     shadowStyle={styles.shadow}
-                    height={60}
-                    circleWidth={60}
+                    height={55}
+                    circleWidth={50}
                     bgColor="white"
                     initialRouteName="home"
                     borderTopLeftRight
@@ -86,7 +86,7 @@
                                 style={styles.button}
                                 onPress={() => Alert.alert('Action Button Clicked!')}
                             >
-                                <MaterialIcons name="camera" color="gray" size={30} />
+                                <MaterialIcons name="qr-code-scanner" color="gray" size={30} />
                             </TouchableOpacity>
                         </Animated.View>
                     )}
@@ -170,7 +170,7 @@
             backgroundColor: '#FFEBCD',
         },
         bottomSpacer: {
-            height: 10,
+            height: 15,
             backgroundColor: 'white',
         },
     });
