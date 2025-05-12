@@ -1,9 +1,12 @@
 import React from 'react';
 import { SafeAreaView, View, Text, TouchableOpacity, FlatList, StyleSheet } from 'react-native';
+import { MaterialIcons } from '@expo/vector-icons';
+import AntDesign from '@expo/vector-icons/AntDesign';
+import { useRouter } from 'expo-router';
 import NavigationBar from '@/components/Common/NavigationBar';
-import StoryItem from './community/StoryItem';
-import PostItem from './community/PostItem';
-import { Story, Post } from './community/types';
+import StoryItem from './StoryItem';
+import PostItem from './PostItem';
+import { Story, Post } from './types';
 
 const mockStories: Story[] = [
   { id: '1', user: 'Bạn', avatar: 'https://randomuser.me/api/portraits/men/1.jpg', isCurrentUser: true },
@@ -21,15 +24,25 @@ const mockPosts: Post[] = [
 ];
 
 const CommunityScreen = () => {
+  const router = useRouter();
+
   return (
     <SafeAreaView style={styles.container}>
+      {/* Header */}
+      <View style={styles.header}>
+        <Text style={styles.headerTitle}>SmartGarden</Text>
+        <TouchableOpacity onPress={() => router.push('/(Main)/chat-box')}>
+          <AntDesign name="message1" size={24} color="#166534" />
+        </TouchableOpacity>
+      </View>
+
       {/* Stories */}
       <View>
         <FlatList
           data={mockStories}
           keyExtractor={item => item.id}
           horizontal
-          showsHorizontalScrollIndicator={false}
+         showsHorizontalScrollIndicator={false}
           style={styles.storiesList}
           contentContainerStyle={styles.storiesContainer}
           renderItem={({ item }) => <StoryItem item={item} />}
@@ -57,12 +70,23 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#FFFFFF',
   },
+  header: {
+    flexDirection: 'row',
+     justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    backgroundColor: '#FFFFFF',
+  },
+  headerTitle: {
+    fontSize: 25,
+    fontWeight: 'bold',
+    color: '#166534',
+  },
   contentContainer: {
     paddingBottom: 80,
   },
   storiesList: {
-    borderBottomWidth: 0.5,
-    borderBottomColor: '#DBDBDB',
     backgroundColor: '#FFFFFF',
   },
   storiesContainer: {

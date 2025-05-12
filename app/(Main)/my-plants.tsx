@@ -19,6 +19,7 @@ import PlantList from '@/components/Plants/PlantList';
 import AddPlantModal from '@/components/Plants/AddPlantModal';
 import StorageService from '@/components/services/storageService';
 import { router } from 'expo-router';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const images = {
   logo: require('@/assets/icons/logo.png'),
@@ -80,9 +81,6 @@ const SmartGardenHome = () => {
     return filtered;
   }, [plants, searchText, filterCriteria]);
 
-  const handleNavigateProfile = () => {
-    router.push('./profile');
-  };
 
   // Search handling
   const handleSearch = (text: string) => {
@@ -216,50 +214,51 @@ const SmartGardenHome = () => {
           paddingVertical: 15,
         }}
       >
-        {/* Logo and Profile */}
-        <Pressable
-          onPress={handleNavigateProfile}
-          accessible
-          accessibilityLabel="Logo"
-          style={{
+        {/* Logo and Welcome Text */}        <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center' }}>
+          <View style={{
             width: 45,
             height: 45,
+            borderRadius: 25,
             backgroundColor: 'white',
-            borderRadius: 30,
+            marginRight: 12,
+            shadowColor: '#000',
+            shadowOffset: {
+              width: 0,
+              height: 2,
+            },
+            shadowOpacity: 0.25,
+            shadowRadius: 3.84,
+            elevation: 5,
             justifyContent: 'center',
             alignItems: 'center',
-            shadowColor: '#000',
-            shadowOffset: { width: 0, height: 1 },
-            shadowOpacity: 0.3,
-            shadowRadius: 3,
-            marginRight: 10,
-          }}
-        >
-          <Image source={images.logo} style={{ width: 30, height: 30 }} />
-        </Pressable>
-        {/* Header Texts */}
-        <View style={{ flex: 1 }}>
-          <Text
-            style={{
-              fontWeight: 'bold',
-              fontSize: 28,
-              color: '#166534',
-              marginBottom: 2,
-              textAlign: 'left',
-            }}
-          >
-            Smart Garden
-          </Text>
-          <Text style={{ color: '#388e3c', fontSize: 15, fontWeight: '600' }}>
-            Chào mừng trở lại!
-          </Text>
+          }}>
+            <Image 
+              source={images.logo} 
+              style={{ 
+                width: 35, 
+                height: 35,
+                borderRadius: 17.5,
+              }} 
+            />
+          </View>
+          <View>
+            <Text
+              style={{
+                fontWeight: 'bold',
+                fontSize: 28,
+                color: '#166534',
+                marginBottom: 2,
+                textAlign: 'left',
+              }}
+            >
+              Smart Garden
+            </Text>
+            <Text style={{ color: '#388e3c', fontSize: 15, fontWeight: '600' }}>
+              Chào mừng trở lại!
+            </Text>
+          </View>
         </View>
-        {/* Current Date */}
-        <View style={{ alignItems: 'flex-end', minWidth: 90 }}>
-          <Text style={{ color: '#4B5563', fontSize: 13, fontWeight: '500' }}>
-            {new Date().toLocaleDateString('vi-VN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
-          </Text>
-        </View>
+        {/* Add Plant Button */}
       </View>
 
       <SearchBar

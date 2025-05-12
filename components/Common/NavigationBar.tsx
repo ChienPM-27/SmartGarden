@@ -12,6 +12,7 @@ import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { useRouter, usePathname } from 'expo-router';
 import { Camera } from 'expo-camera';
 import * as ImagePicker from 'expo-image-picker';
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 
 const { height: screenHeight } = Dimensions.get('window');
 

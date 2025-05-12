@@ -24,9 +24,9 @@ const _Layout = () => {
           }}
         />
         <Tabs.Screen
-          name="setting"
+          name="community/index"
           options={{
-            title: 'Setting',
+            title: 'Community',
             headerShown: false,
           }}
         />
