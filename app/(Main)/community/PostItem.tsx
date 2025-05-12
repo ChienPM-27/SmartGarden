@@ -1,46 +1,91 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, Image, TouchableOpacity, StyleSheet } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
-import { Post } from './types';
+import CommentModal from '@/components/Social/Post/CommentModal';
+import { Post, Comment } from './types';
 
-const PostItem: React.FC<{ item: Post }> = ({ item }) => (
-  <View style={styles.postCard}>
-    <View style={styles.postHeader}>
-      <Image source={{ uri: item.avatar }} style={styles.postAvatar} />
-      <View style={{ flex: 1 }}>
-        <Text style={styles.postUser}>{item.user}</Text>
+const PostItem: React.FC<{ 
+  item: Post, 
+  onUpdatePost: (postId: string, updatedPost: Partial<Post>) => void 
+}> = ({ item, onUpdatePost }) => {
+  const [isCommentModalVisible, setIsCommentModalVisible] = useState(false);
+
+  const handleAddComment = (newComment: Omit<Comment, 'id'>) => {
+    const commentToAdd: Comment = {
+      ...newComment,
+      id: (item.comments?.length || 0 + 1).toString()
+    };
+
+    const updatedComments = [...(item.comments || []), commentToAdd];
+    
+    onUpdatePost(item.id, { comments: updatedComments });
+  };
+
+  return (
+    <View style={styles.postCard}>
+      <View style={styles.postHeader}>
+        <Image source={{ uri: item.avatar }} style={styles.postAvatar} />
+        <View style={{ flex: 1 }}>
+          <Text style={styles.postUser}>{item.user}</Text>
+        </View>
+        <TouchableOpacity>
+          <MaterialIcons name="more-horiz" size={24} color="#4B5563" />
+        </TouchableOpacity>
       </View>
-      <TouchableOpacity>
-        <MaterialIcons name="more-horiz" size={24} color="#4B5563" />
-      </TouchableOpacity>
-    </View>
-    <Image source={{ uri: item.image }} style={styles.postImage} />
-    <View style={styles.postActions}>
-      <View style={styles.leftActions}>
-        <TouchableOpacity style={styles.actionBtn}>
-          <MaterialIcons name={item.isLiked ? "favorite" : "favorite-border"} size={26} color={item.isLiked ? "#F43F5E" : "#262626"} />
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.actionBtn}>
-          <MaterialIcons name="chat-bubble-outline" size={24} color="#262626" />
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.actionBtn}>
-          <MaterialIcons name="send" size={24} color="#262626" />
+      <Image source={{ uri: item.image }} style={styles.postImage} />
+      <View style={styles.postActions}>
+        <View style={styles.leftActions}>
+          <TouchableOpacity style={styles.actionBtn}>
+            <MaterialIcons 
+              name={item.isLiked ? "favorite" : "favorite-border"} 
+              size={26} 
+              color={item.isLiked ? "#F43F5E" : "#262626"} 
+            />
+          </TouchableOpacity>
+          <TouchableOpacity 
+            style={styles.actionBtn}
+            onPress={() => setIsCommentModalVisible(true)}
+          >
+            <MaterialIcons name="chat-bubble-outline" size={24} color="#262626" />
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.actionBtn}>
+            <MaterialIcons name="send" size={24} color="#262626" />
+          </TouchableOpacity>
+        </View>
+        <TouchableOpacity>
+          <MaterialIcons name="bookmark-border" size={26} color="#262626" />
         </TouchableOpacity>
       </View>
-      <TouchableOpacity>
-        <MaterialIcons name="bookmark-border" size={26} color="#262626" />
-      </TouchableOpacity>
+      <Text style={styles.likesCount}>{item.likes} lượt thích</Text>
+      <View style={styles.captionContainer}>
+        <Text style={styles.captionText}>
+          <Text style={styles.postUserCaption}>{item.user}</Text>{' '}
+          {item.content}
+        </Text>
+      </View>
+      {item.comments && item.comments.length > 0 && (
+        <TouchableOpacity 
+          style={styles.viewCommentsContainer}
+          onPress={() => setIsCommentModalVisible(true)}
+        >
+          <Text style={styles.viewCommentsText}>
+            Xem {item.comments.length} bình luận
+          </Text>
+        </TouchableOpacity>
+      )}
+      <Text style={styles.postTime}>{item.time}</Text>
+
+      {/* Comment Modal */}
+      <CommentModal
+        isVisible={isCommentModalVisible}
+        onClose={() => setIsCommentModalVisible(false)}
+        postUser={item.user}
+        comments={item.comments}
+        onAddComment={handleAddComment}
+      />
     </View>
-    <Text style={styles.likesCount}>{item.likes} lượt thích</Text>
-    <View style={styles.captionContainer}>
-      <Text style={styles.captionText}>
-        <Text style={styles.postUserCaption}>{item.user}</Text>{' '}
-        {item.content}
-      </Text>
-    </View>
-    <Text style={styles.postTime}>{item.time}</Text>
-  </View>
-);
+  );
+};
 
 const styles = StyleSheet.create({
   postCard: {
@@ -102,6 +147,13 @@ const styles = StyleSheet.create({
     color: '#8E8E8E',
     paddingHorizontal: 12,
     paddingBottom: 12,
+  },
+  viewCommentsContainer: {
+    paddingHorizontal: 12,
+    marginBottom: 8,
+  },
+  viewCommentsText: {
+    color: '#8E8E8E',
   },
 });
 

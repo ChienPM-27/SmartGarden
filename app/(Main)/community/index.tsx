@@ -33,10 +33,21 @@ const CommunityScreen = () => {
       id: (posts.length + 1).toString(),
       likes: 0,
       isLiked: false,
-      time: 'Vừa xong'
+      time: 'Vừa xong',
+      comments: []
     };
     
     setPosts(currentPosts => [postToAdd, ...currentPosts]);
+  };
+
+  const handleUpdatePost = (postId: string, updatedPostData: Partial<Post>) => {
+    setPosts(currentPosts => 
+      currentPosts.map(post => 
+        post.id === postId 
+          ? { ...post, ...updatedPostData } 
+          : post
+      )
+    );
   };
 
   return (
@@ -51,7 +62,7 @@ const CommunityScreen = () => {
           >
             <MaterialIcons name="add" size={24} color="#166534" />
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => router.push('./chat')}>
+          <TouchableOpacity onPress={() => router.push('/(Main)/chat-box')}>
             <AntDesign name="message1" size={24} color="#166534" />
           </TouchableOpacity>
         </View>
@@ -76,7 +87,12 @@ const CommunityScreen = () => {
         keyExtractor={item => item.id}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.contentContainer}
-        renderItem={({ item }) => <PostItem item={item} />}
+        renderItem={({ item }) => (
+          <PostItem 
+            item={item} 
+            onUpdatePost={handleUpdatePost} 
+          />
+        )}
         ListEmptyComponent={() => (
           <View style={styles.emptyPostsContainer}>
             <Text style={styles.emptyPostsText}>Chưa có bài đăng</Text>
