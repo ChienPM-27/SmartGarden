@@ -1,62 +1,97 @@
-import React from 'react';
-import { SafeAreaView, View, Text, TouchableOpacity, FlatList, StyleSheet } from 'react-native';
+import React, { useState } from 'react';
+import { 
+  SafeAreaView, 
+  View, 
+  Text, 
+  TouchableOpacity, 
+  FlatList, 
+  StyleSheet 
+} from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import { useRouter } from 'expo-router';
 import NavigationBar from '@/components/Common/NavigationBar';
 import StoryItem from './StoryItem';
 import PostItem from './PostItem';
+import PostModal from '@/components/Social/Post/PostModal';
 import { Story, Post } from './types';
 
-const mockStories: Story[] = [
+// Modified to include only the current user's story
+const initialStories: Story[] = [
   { id: '1', user: 'Bạn', avatar: 'https://randomuser.me/api/portraits/men/1.jpg', isCurrentUser: true },
-  { id: '2', user: 'Minh Chien', avatar: 'https://randomuser.me/api/portraits/men/2.jpg' },
-  { id: '3', user: 'Lan Anh', avatar: 'https://randomuser.me/api/portraits/women/2.jpg' },
-  { id: '4', user: 'Hữu Phước', avatar: 'https://randomuser.me/api/portraits/men/3.jpg' },
-  { id: '5', user: 'Ngọc Mai', avatar: 'https://randomuser.me/api/portraits/women/4.jpg' },
-  { id: '6', user: 'Bảo Long', avatar: 'https://randomuser.me/api/portraits/men/5.jpg' },
-];
-
-const mockPosts: Post[] = [
-  { id: '1', user: 'Minh Chien', avatar: 'https://randomuser.me/api/portraits/men/2.jpg', content: '🌱 Hôm nay mình vừa trồng thêm rau cải mới! #VườnRauSạch #SmartGarden', time: '2 phút trước', image: 'https://images.unsplash.com/photo-1523348837708-15d4a09cfac2?auto=format&fit=crop&w=600&q=80', likes: 24, isLiked: false },
-  { id: '2', user: 'Lan Anh', avatar: 'https://randomuser.me/api/portraits/women/2.jpg', content: 'Ai có kinh nghiệm trồng dưa leo cho mình xin tips với ạ! Cây của mình đang bị vàng lá 😢', time: '10 phút trước', image: 'https://images.unsplash.com/photo-1518977822534-7049a61ee0c2?auto=format&fit=crop&w=600&q=80', likes: 16, isLiked: true },
-  { id: '3', user: 'Hữu Phước', avatar: 'https://randomuser.me/api/portraits/men/3.jpg', content: 'Vườn nhà mình vừa thu hoạch cà chua 🍅 Mời mọi người ghé qua ăn cùng!', time: '30 phút trước', image: 'https://images.unsplash.com/photo-1592921870583-aeafb0639ffe?auto=format&fit=crop&w=600&q=80', likes: 42, isLiked: false },
 ];
 
 const CommunityScreen = () => {
   const router = useRouter();
+  const [stories] = useState<Story[]>(initialStories);
+  const [posts, setPosts] = useState<Post[]>([]);
+  const [isPostModalVisible, setIsPostModalVisible] = useState(false);
+
+  const handleCreatePost = (newPost: Omit<Post, 'id' | 'likes' | 'isLiked' | 'time'>) => {
+    const postToAdd: Post = {
+      ...newPost,
+      id: (posts.length + 1).toString(),
+      likes: 0,
+      isLiked: false,
+      time: 'Vừa xong'
+    };
+    
+    setPosts(currentPosts => [postToAdd, ...currentPosts]);
+  };
 
   return (
     <SafeAreaView style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
         <Text style={styles.headerTitle}>SmartGarden</Text>
-        <TouchableOpacity onPress={() => router.push('/(Main)/chat-box')}>
-          <AntDesign name="message1" size={24} color="#166534" />
-        </TouchableOpacity>
+        <View style={styles.headerActions}>
+          <TouchableOpacity 
+            style={styles.addPostButton} 
+            onPress={() => setIsPostModalVisible(true)}
+          >
+            <MaterialIcons name="add" size={24} color="#166534" />
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => router.push('./chat')}>
+            <AntDesign name="message1" size={24} color="#166534" />
+          </TouchableOpacity>
+        </View>
       </View>
 
       {/* Stories */}
       <View>
         <FlatList
-          data={mockStories}
+          data={stories}
           keyExtractor={item => item.id}
           horizontal
-         showsHorizontalScrollIndicator={false}
+          showsHorizontalScrollIndicator={false}
           style={styles.storiesList}
           contentContainerStyle={styles.storiesContainer}
           renderItem={({ item }) => <StoryItem item={item} />}
         />
       </View>
+      
       {/* Posts */}
       <FlatList
-        data={mockPosts}
+        data={posts}
         keyExtractor={item => item.id}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.contentContainer}
         renderItem={({ item }) => <PostItem item={item} />}
+        ListEmptyComponent={() => (
+          <View style={styles.emptyPostsContainer}>
+            <Text style={styles.emptyPostsText}>Chưa có bài đăng</Text>
+          </View>
+        )}
         style={{ flex: 1 }}
       />
+      
+      {/* Post Modal */}
+      <PostModal
+        isVisible={isPostModalVisible}
+        onClose={() => setIsPostModalVisible(false)}
+        onPost={handleCreatePost}
+      />
+      
       {/* Navigation Bar */}
       <View style={styles.navigationBarContainer}>
         <NavigationBar />
@@ -72,11 +107,24 @@ const styles = StyleSheet.create({
   },
   header: {
     flexDirection: 'row',
-     justifyContent: 'space-between',
+    justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 16,
     paddingVertical: 10,
     backgroundColor: '#FFFFFF',
+  },
+  headerActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  addPostButton: {
+    marginRight: 16,
+    backgroundColor: '#E8E8E8',
+    borderRadius: 20,
+    width: 36,
+    height: 36,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   headerTitle: {
     fontSize: 25,
@@ -98,6 +146,16 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
+  },
+  emptyPostsContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 50,
+  },
+  emptyPostsText: {
+    fontSize: 16,
+    color: '#8E8E8E',
   },
 });
 
