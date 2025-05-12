@@ -45,6 +45,10 @@ const PostModal: React.FC<PostModalProps> = ({ isVisible, onClose, onPost }) => 
     }
   };
 
+  const handleRemoveImage = () => {
+    setImageUri('');
+  };
+
   const handlePost = () => {
     if (content.trim() || imageUri) {
       onPost({
@@ -71,38 +75,70 @@ const PostModal: React.FC<PostModalProps> = ({ isVisible, onClose, onPost }) => 
       <View style={styles.modalOverlay}>
         <KeyboardAvoidingView
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-          style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}
+          style={styles.keyboardAvoidContainer}
         >
-          <View style={styles.modalContentCentered}>
+          <View style={styles.modalContent}>
             {/* Header */}
             <View style={styles.modalHeader}>
-              <TouchableOpacity onPress={onClose}>
+              <TouchableOpacity onPress={onClose} style={styles.headerButton}>
                 <MaterialIcons name="close" size={24} color="#166534" />
               </TouchableOpacity>
               <Text style={styles.modalTitle}>Tạo bài viết</Text>
-              <TouchableOpacity onPress={handlePost}>
-                <Text style={styles.postButton}>Đăng</Text>
+              <TouchableOpacity 
+                onPress={handlePost} 
+                disabled={!content.trim() && !imageUri}
+                style={styles.headerButton}
+              >
+                <Text style={[
+                  styles.postButton, 
+                  (!content.trim() && !imageUri) && styles.postButtonDisabled
+                ]}>
+                  Đăng
+                </Text>
               </TouchableOpacity>
             </View>
 
-            {/* Content Input */}
-            <TextInput
-              style={styles.contentInput}
-              multiline
-              placeholder="Bạn đang nghĩ gì?"
-              placeholderTextColor="#8E8E8E"
-              value={content}
-              onChangeText={setContent}
-            />
-
-            {/* Image Preview */}
-            {imageUri ? (
+            {/* User Info */}
+            <View style={styles.userInfoContainer}>
               <Image 
-                source={{ uri: imageUri }} 
-                style={styles.imagePreview} 
-                resizeMode="cover"
+                source={{ uri: 'https://randomuser.me/api/portraits/men/1.jpg' }} 
+                style={styles.userAvatar} 
               />
-            ) : null}
+              <Text style={styles.userName}>Bạn</Text>
+            </View>
+
+            {/* Content Input */}
+            <ScrollView 
+              keyboardShouldPersistTaps="handled"
+              contentContainerStyle={styles.scrollViewContent}
+            >
+              <TextInput
+                style={styles.contentInput}
+                multiline
+                placeholder="Bạn đang nghĩ gì?"
+                placeholderTextColor="#8E8E8E"
+                value={content}
+                onChangeText={setContent}
+                textAlignVertical="top"
+              />
+
+              {/* Image Preview */}
+              {imageUri && (
+                <View style={styles.imagePreviewContainer}>
+                  <Image 
+                    source={{ uri: imageUri }} 
+                    style={styles.imagePreview} 
+                    resizeMode="cover"
+                  />
+                  <TouchableOpacity 
+                    style={styles.removeImageButton}
+                    onPress={handleRemoveImage}
+                  >
+                    <MaterialIcons name="close" size={20} color="white" />
+                  </TouchableOpacity>
+                </View>
+              )}
+            </ScrollView>
 
             {/* Actions */}
             <View style={styles.actionsContainer}>
@@ -125,54 +161,101 @@ const styles = StyleSheet.create({
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: 'flex-end',
   },
-  modalContentCentered: {
+  keyboardAvoidContainer: {
+    flex: 1,
+    justifyContent: 'flex-end',
+  },
+  modalContent: {
     backgroundColor: 'white',
-    borderRadius: 20,
-    padding: 16,
-    width: '92%',
-    maxWidth: 420,
-    maxHeight: '90%',
-    alignSelf: 'center',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    height: '66%', // Changed to 2/3 of the screen
   },
   modalHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 16,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E5E7EB',
+  },
+  headerButton: {
+    width: 60,
   },
   modalTitle: {
     fontSize: 18,
     fontWeight: 'bold',
     color: '#166534',
+    textAlign: 'center',
   },
   postButton: {
     color: '#10B981',
     fontWeight: 'bold',
+    textAlign: 'right',
+  },
+  postButtonDisabled: {
+    color: '#A1A1AA',
+  },
+  userInfoContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+  },
+  userAvatar: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    marginRight: 12,
+  },
+  userName: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#262626',
+  },
+  scrollViewContent: {
+    flexGrow: 1,
+    paddingHorizontal: 16,
   },
   contentInput: {
     minHeight: 100,
-    textAlignVertical: 'top',
     fontSize: 16,
     color: '#262626',
-    marginBottom: 16,
+  },
+  imagePreviewContainer: {
+    position: 'relative',
+    marginTop: 16,
   },
   imagePreview: {
     width: '100%',
     height: 250,
     borderRadius: 10,
-    marginBottom: 16,
+  },
+  removeImageButton: {
+    position: 'absolute',
+    top: 10,
+    right: 10,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    borderRadius: 15,
+    width: 30,
+    height: 30,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   actionsContainer: {
     flexDirection: 'row',
     alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderTopWidth: 1,
+    borderTopColor: '#E5E7EB',
   },
   actionButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginRight: 16,
   },
   actionText: {
     marginLeft: 8,

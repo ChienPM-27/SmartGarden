@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, Image, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, Image, TouchableOpacity, StyleSheet, Animated } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import CommentModal from '@/components/Social/Post/CommentModal';
 import { Post, Comment } from './types';
@@ -9,6 +9,39 @@ const PostItem: React.FC<{
   onUpdatePost: (postId: string, updatedPost: Partial<Post>) => void 
 }> = ({ item, onUpdatePost }) => {
   const [isCommentModalVisible, setIsCommentModalVisible] = useState(false);
+  
+  // Animation values for button press effects
+  const [likeScale] = useState(new Animated.Value(1));
+  const [commentScale] = useState(new Animated.Value(1));
+  const [shareScale] = useState(new Animated.Value(1));
+
+  // Handle button press in animations
+  const handlePressIn = (scaleAnim: Animated.Value) => {
+    Animated.spring(scaleAnim, {
+      toValue: 0.95,
+      useNativeDriver: true,
+    }).start();
+  };
+
+  const handlePressOut = (scaleAnim: Animated.Value) => {
+    Animated.spring(scaleAnim, {
+      toValue: 1,
+      friction: 3,
+      useNativeDriver: true,
+    }).start();
+  };
+
+  // Handle like functionality
+  const handleLike = () => {
+    const updatedLikes = item.isLiked 
+      ? item.likes - 1 
+      : item.likes + 1;
+    
+    onUpdatePost(item.id, { 
+      isLiked: !item.isLiked, 
+      likes: updatedLikes 
+    });
+  };
 
   const handleAddComment = (newComment: Omit<Comment, 'id'>) => {
     const commentToAdd: Comment = {
@@ -19,6 +52,11 @@ const PostItem: React.FC<{
     const updatedComments = [...(item.comments || []), commentToAdd];
     
     onUpdatePost(item.id, { comments: updatedComments });
+  };
+
+  // Function to format large numbers
+  const formatNumber = (num: number) => {
+    return num > 999 ? `${Math.floor(num / 1000)}k` : num.toString();
   };
 
   return (
@@ -35,22 +73,47 @@ const PostItem: React.FC<{
       <Image source={{ uri: item.image }} style={styles.postImage} />
       <View style={styles.postActions}>
         <View style={styles.leftActions}>
-          <TouchableOpacity style={styles.actionBtn}>
-            <MaterialIcons 
-              name={item.isLiked ? "favorite" : "favorite-border"} 
-              size={26} 
-              color={item.isLiked ? "#F43F5E" : "#262626"} 
-            />
-          </TouchableOpacity>
-          <TouchableOpacity 
-            style={styles.actionBtn}
-            onPress={() => setIsCommentModalVisible(true)}
-          >
-            <MaterialIcons name="chat-bubble-outline" size={24} color="#262626" />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.actionBtn}>
-            <MaterialIcons name="send" size={24} color="#262626" />
-          </TouchableOpacity>
+          <Animated.View style={[styles.actionContainer, { transform: [{ scale: likeScale }] }]}>
+            <TouchableOpacity 
+              style={styles.actionBtn}
+              onPress={handleLike}
+              onPressIn={() => handlePressIn(likeScale)}
+              onPressOut={() => handlePressOut(likeScale)}
+            >
+              <MaterialIcons 
+                name={item.isLiked ? "favorite" : "favorite-border"} 
+                size={26} 
+                color={item.isLiked ? "#F43F5E" : "#262626"} 
+              />
+            </TouchableOpacity>
+            {item.likes > 0 && (
+              <Text style={styles.actionCount}>{formatNumber(item.likes)}</Text>
+            )}
+          </Animated.View>
+          <Animated.View style={[styles.actionContainer, { transform: [{ scale: commentScale }] }]}>
+            <TouchableOpacity 
+              style={styles.actionBtn}
+              onPress={() => setIsCommentModalVisible(true)}
+              onPressIn={() => handlePressIn(commentScale)}
+              onPressOut={() => handlePressOut(commentScale)}
+            >
+              <MaterialIcons name="chat-bubble-outline" size={24} color="#262626" />
+            </TouchableOpacity>
+            {item.comments && item.comments.length > 0 && (
+              <Text style={styles.actionCount}>{formatNumber(item.comments.length)}</Text>
+            )}
+          </Animated.View>
+          <Animated.View style={[styles.actionContainer, { transform: [{ scale: shareScale }] }]}>
+            <TouchableOpacity 
+              style={styles.actionBtn}
+              onPressIn={() => handlePressIn(shareScale)}
+              onPressOut={() => handlePressOut(shareScale)}
+            >
+              <MaterialIcons name="send" size={24} color="#262626" />
+            </TouchableOpacity>
+            {/* Assuming we want to track share count */}
+            <Text style={styles.actionCount}>0</Text>
+          </Animated.View>
         </View>
         <TouchableOpacity>
           <MaterialIcons name="bookmark-border" size={26} color="#262626" />
@@ -122,8 +185,17 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
   },
-  actionBtn: {
+  actionContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
     marginRight: 16,
+  },
+  actionBtn: {
+    marginRight: 4,
+  },
+  actionCount: {
+    color: '#262626',
+    fontSize: 12,
   },
   likesCount: {
     fontWeight: 'bold',
