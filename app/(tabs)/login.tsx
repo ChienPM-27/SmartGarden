@@ -9,6 +9,7 @@ import {
     Platform,
     TouchableWithoutFeedback,
     Keyboard,
+    Animated,
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { images } from '@/constants/images';
@@ -21,6 +22,32 @@ export default function LoginScreen() {
     const [errorMessage, setErrorMessage] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const [isLoggingIn, setIsLoggingIn] = useState(false);
+    const [fadeAnim] = useState(new Animated.Value(0));
+    const [loginScale] = useState(new Animated.Value(1));
+    const [createScale] = useState(new Animated.Value(1));
+    const [forgotScale] = useState(new Animated.Value(1));
+
+    React.useEffect(() => {
+        Animated.timing(fadeAnim, {
+            toValue: 1,
+            duration: 600,
+            useNativeDriver: true,
+        }).start();
+    }, []);
+
+    const handlePressIn = (scaleAnim: Animated.Value) => {
+        Animated.spring(scaleAnim, {
+            toValue: 0.95,
+            useNativeDriver: true,
+        }).start();
+    };
+    const handlePressOut = (scaleAnim: Animated.Value) => {
+        Animated.spring(scaleAnim, {
+            toValue: 1,
+            friction: 3,
+            useNativeDriver: true,
+        }).start();
+    };
 
     const handleNavigateCreateAccount = () => {
         setUsername('');
@@ -62,7 +89,7 @@ export default function LoginScreen() {
                 style={{ width: '100%' }}
             >
                 <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-                    <View className="items-center">
+                    <Animated.View style={{ opacity: fadeAnim }} className="items-center">
                         <View
                             style={{
                                 backgroundColor: 'rgba(255, 255, 255, 0.85)',
@@ -115,30 +142,46 @@ export default function LoginScreen() {
                                 <Text className="text-red-600 mb-4">{errorMessage}</Text>
                             ) : null}
 
-                            <TouchableOpacity
-                                className={`py-3 rounded-xl ${(!username || !password || isLoggingIn) ? 'bg-yellow-200' : 'bg-yellow-400'}`}
-                                disabled={!username || !password || isLoggingIn}
-                                onPress={handleNavigateLogin}
-                            >
-                                <Text className="text-center text-green-900 font-semibold">
-                                    {isLoggingIn ? 'Logging in...' : 'Log In'}
-                                </Text>
-                            </TouchableOpacity>
+                            <Animated.View style={{ transform: [{ scale: loginScale }] }}>
+                                <TouchableOpacity
+                                    className={`py-3 rounded-xl ${(!username || !password || isLoggingIn) ? 'bg-yellow-200' : 'bg-yellow-400'}`}
+                                    disabled={!username || !password || isLoggingIn}
+                                    onPress={handleNavigateLogin}
+                                    onPressIn={() => handlePressIn(loginScale)}
+                                    onPressOut={() => handlePressOut(loginScale)}
+                                >
+                                    <Text className="text-center text-green-900 font-semibold">
+                                        {isLoggingIn ? 'Logging in...' : 'Log In'}
+                                    </Text>
+                                </TouchableOpacity>
+                            </Animated.View>
 
                             <View className="flex-row justify-between mt-4">
-                                <TouchableOpacity onPress={handleNavigateCreateAccount}>
-                                    <Text className="text-green-800 font-semibold">Create account</Text>
-                                </TouchableOpacity>
-                                <TouchableOpacity onPress={handleNavigateForgotPassword}>
-                                    <Text className="text-green-800 font-semibold">Forgot password?</Text>
-                                </TouchableOpacity>
+                                <Animated.View style={{ transform: [{ scale: createScale }] }}>
+                                    <TouchableOpacity
+                                        onPress={handleNavigateCreateAccount}
+                                        onPressIn={() => handlePressIn(createScale)}
+                                        onPressOut={() => handlePressOut(createScale)}
+                                    >
+                                        <Text className="text-green-800 font-semibold">Create account</Text>
+                                    </TouchableOpacity>
+                                </Animated.View>
+                                <Animated.View style={{ transform: [{ scale: forgotScale }] }}>
+                                    <TouchableOpacity
+                                        onPress={handleNavigateForgotPassword}
+                                        onPressIn={() => handlePressIn(forgotScale)}
+                                        onPressOut={() => handlePressOut(forgotScale)}
+                                    >
+                                        <Text className="text-green-800 font-semibold">Forgot password?</Text>
+                                    </TouchableOpacity>
+                                </Animated.View>
                             </View>
                         </View>
 
                         <Text className="text-green-950 font-semibold mt-3 text-sm opacity-80">
                             ©2025 SmartGarden. Grow smart, live green.
                         </Text>
-                    </View>
+                    </Animated.View>
                 </TouchableWithoutFeedback>
             </KeyboardAvoidingView>
         </ImageBackground>

@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
     SafeAreaView,
     TextInput,
@@ -9,12 +9,16 @@ import {
     KeyboardAvoidingView,
     Platform,
     ActivityIndicator,
+    Image,
+    StyleSheet,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 
 interface Message {
     id: string;
-    text: string;
+    text?: string;
+    imageUri?: string;
     sender: 'user' | 'bot';
 }
 
@@ -22,19 +26,35 @@ export default function App() {
     const [messages, setMessages] = useState<Message[]>([]);
     const [input, setInput] = useState('');
     const [loading, setLoading] = useState(false);
+    const [pendingImage, setPendingImage] = useState<string | null>(null); // ảnh chờ gửi
     const flatListRef = useRef<FlatList<Message>>(null);
+    const { imageUri } = useLocalSearchParams();
+    const router = useRouter();
+
+    // Khi nhận imageUri mới, lưu vào pendingImage
+    useEffect(() => {
+        if (imageUri) {
+            const uri = Array.isArray(imageUri) ? imageUri[0] : imageUri;
+            if (uri !== pendingImage) {
+                setPendingImage(uri);
+            }
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [imageUri]);
 
     const handleSend = async () => {
-        if (!input.trim()) return;
+        if (!input.trim() && !pendingImage) return;
 
         const userMessage: Message = {
             id: Date.now().toString(),
-            text: input,
+            text: input || undefined,
+            imageUri: pendingImage || undefined,
             sender: 'user',
         };
 
         setMessages((prev) => [...prev, userMessage]);
         setInput('');
+        setPendingImage(null);
         setLoading(true);
 
         const aiReply = await getAIResponse(input);
@@ -58,31 +78,91 @@ export default function App() {
         return `🌱 SmartBot trả lời: "${userText}"`;
     };
 
-    const renderItem = ({ item }: { item: Message }) => (
-        <View
-            className={`px-4 py-2 my-1 rounded-xl max-w-[80%] ${
-                item.sender === 'user' ? 'self-end bg-green-500' : 'self-start bg-gray-200'
-            }`}
-        >
-            <Text className={item.sender === 'user' ? 'text-white' : 'text-black'}>
-                {item.text}
-            </Text>
-        </View>
-    );
+    const renderItem = ({ item }: { item: Message }) => {
+        if (item.imageUri) {
+            return (
+                <View
+                    style={[
+                        {
+                            alignSelf: item.sender === 'user' ? 'flex-end' : 'flex-start',
+                            backgroundColor: item.sender === 'user' ? '#22c55e' : '#e5e7eb',
+                            borderRadius: 16,
+                            marginVertical: 4,
+                            maxWidth: '80%',
+                            padding: 4,
+                        },
+                    ]}
+                >
+                    <Image
+                        source={{ uri: item.imageUri }}
+                        style={{ width: 180, height: 180, borderRadius: 12 }}
+                        resizeMode="cover"
+                    />
+                    {item.text ? (
+                        <Text style={{ color: item.sender === 'user' ? '#fff' : '#000', marginTop: 8 }}>{item.text}</Text>
+                    ) : null}
+                </View>
+            );
+        }
+        return (
+            <View
+                style={[
+                    {
+                        alignSelf: item.sender === 'user' ? 'flex-end' : 'flex-start',
+                        backgroundColor: item.sender === 'user' ? '#22c55e' : '#e5e7eb',
+                        borderRadius: 16,
+                        marginVertical: 4,
+                        maxWidth: '80%',
+                        paddingHorizontal: 12,
+                        paddingVertical: 8,
+                    },
+                ]}
+            >
+                <Text style={{ color: item.sender === 'user' ? '#fff' : '#000' }}>{item.text}</Text>
+            </View>
+        );
+    };
 
     return (
-        <SafeAreaView className="flex-1 bg-white">
+        <SafeAreaView style={[styles.container, { backgroundColor: '#f0fdf4' }]}> {/* Nền xanh nhạt hơn */}
+            {/* Header Chat */}
+            <View style={{ flexDirection: 'row', alignItems: 'center', padding: 14, backgroundColor: '#22c55e', borderBottomLeftRadius: 18, borderBottomRightRadius: 18, elevation: 2 }}>
+                <TouchableOpacity onPress={() => router.push('/(Main)/Home')} style={{ marginRight: 10 }}>
+                    <Ionicons name="arrow-back" size={28} color="#fff" />
+                </TouchableOpacity>
+                <Text style={{ fontSize: 20, fontWeight: 'bold', color: '#fff', letterSpacing: 1 }}>SmartGarden Chat</Text>
+            </View>
             <FlatList
                 ref={flatListRef}
                 data={messages}
                 renderItem={renderItem}
                 keyExtractor={(item) => item.id}
-                contentContainerStyle={{ padding: 10 }}
+                contentContainerStyle={{ padding: 14, paddingBottom: 80 }}
+                showsVerticalScrollIndicator={false}
             />
 
             {loading && (
-                <View className="px-4 py-2 self-start bg-gray-200 rounded-xl m-2">
-                    <Text className="text-gray-500 italic">SmartBot đang trả lời...</Text>
+                <View style={{ alignSelf: 'flex-start', backgroundColor: '#e0e7ef', borderRadius: 16, margin: 8, padding: 10, flexDirection: 'row', alignItems: 'center' }}>
+                    <ActivityIndicator size="small" color="#22c55e" style={{ marginRight: 8 }} />
+                    <Text style={{ color: '#166534', fontStyle: 'italic' }}>SmartBot đang trả lời...</Text>
+                </View>
+            )}
+
+            {/* Hàng chờ gửi ảnh */}
+            {pendingImage && (
+                <View style={{ alignSelf: 'flex-end', marginRight: 16, marginBottom: 8 }}>
+                    <View style={{ position: 'relative' }}>
+                        <Image
+                            source={{ uri: pendingImage }}
+                            style={{ width: 90, height: 90, borderRadius: 14, borderWidth: 2, borderColor: '#22c55e' }}
+                        />
+                        <TouchableOpacity
+                            style={{ position: 'absolute', top: -8, right: -8, backgroundColor: '#fff', borderRadius: 12, padding: 2, elevation: 2 }}
+                            onPress={() => setPendingImage(null)}
+                        >
+                            <Ionicons name="close-circle" size={22} color="#ef4444" />
+                        </TouchableOpacity>
+                    </View>
                 </View>
             )}
 
@@ -90,19 +170,20 @@ export default function App() {
                 behavior={Platform.OS === 'ios' ? 'padding' : undefined}
                 keyboardVerticalOffset={90}
             >
-                <View className="flex-row items-center px-4 py-2 border-t border-gray-200 bg-white">
+                <View style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 10, borderTopWidth: 1, borderColor: '#e5e7eb', backgroundColor: '#fff', borderTopLeftRadius: 18, borderTopRightRadius: 18 }}>
                     <TextInput
-                        className="flex-1 h-12 px-4 rounded-full bg-gray-100 text-base text-black"
+                        style={{ flex: 1, height: 48, borderRadius: 24, backgroundColor: '#f3f4f6', paddingHorizontal: 16, color: '#000', fontSize: 16, marginRight: 8, borderWidth: 1, borderColor: '#bbf7d0' }}
                         placeholder="Nhập câu hỏi..."
                         value={input}
                         onChangeText={setInput}
                         multiline
+                        placeholderTextColor="#6ee7b7"
                     />
-                    <TouchableOpacity onPress={handleSend} className="ml-2">
+                    <TouchableOpacity onPress={handleSend} style={{ marginLeft: 4, backgroundColor: '#22c55e', borderRadius: 24, padding: 10 }} disabled={loading}>
                         {loading ? (
-                            <ActivityIndicator size="small" color="#22c55e" />
+                            <ActivityIndicator size="small" color="#fff" />
                         ) : (
-                            <Ionicons name="send" size={24} color="#22c55e" />
+                            <Ionicons name="send" size={22} color="#fff" />
                         )}
                     </TouchableOpacity>
                 </View>
@@ -110,3 +191,11 @@ export default function App() {
         </SafeAreaView>
     );
 }
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        backgroundColor: '#fff',
+        padding: 0,
+    },
+});
