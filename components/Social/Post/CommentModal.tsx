@@ -53,7 +53,7 @@ const CommentModal: React.FC<CommentModalProps> = ({
     if (commentText.trim()) {
       onAddComment({
         user: 'Bạn',
-        avatar: 'https://randomuser.me/api/portraits/men/1.jpg',
+        avatar: 'https://scontent.fsgn5-3.fna.fbcdn.net/v/t39.30808-6/480681851_1843038753128474_8873796576016633436_n.jpg?_nc_cat=104&ccb=1-7&_nc_sid=6ee11a&_nc_ohc=Ay-q9iTYjqMQ7kNvwERSrcX&_nc_oc=AdlLmpSpKAVUKaZu2XPDncMiodoItY-49xLkpiwDz3SC7d0AumbfyT8RD3iWdKQsCtg&_nc_zt=23&_nc_ht=scontent.fsgn5-3.fna&_nc_gid=M4yhnbpFX53mWI4v1LZc6Q&oh=00_AfLZOS4EzzLazs06gDk9P4hGRi4G-EDglGlgEIZkO1AkxQ&oe=682805AC',
         content: commentText.trim(),
         time: 'Vừa xong'
       });
@@ -98,7 +98,7 @@ const CommentModal: React.FC<CommentModalProps> = ({
           {/* Comment Input */}
           <View style={styles.commentInputContainer}>
             <Image 
-              source={{ uri: 'https://randomuser.me/api/portraits/men/1.jpg' }} 
+              source={{ uri: 'https://scontent.fsgn5-3.fna.fbcdn.net/v/t39.30808-6/480681851_1843038753128474_8873796576016633436_n.jpg?_nc_cat=104&ccb=1-7&_nc_sid=6ee11a&_nc_ohc=Ay-q9iTYjqMQ7kNvwERSrcX&_nc_oc=AdlLmpSpKAVUKaZu2XPDncMiodoItY-49xLkpiwDz3SC7d0AumbfyT8RD3iWdKQsCtg&_nc_zt=23&_nc_ht=scontent.fsgn5-3.fna&_nc_gid=M4yhnbpFX53mWI4v1LZc6Q&oh=00_AfLZOS4EzzLazs06gDk9P4hGRi4G-EDglGlgEIZkO1AkxQ&oe=682805AC' }} 
               style={styles.userAvatar} 
             />
             <View style={styles.inputWrapper}>

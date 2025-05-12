@@ -53,9 +53,9 @@ const PostModal: React.FC<PostModalProps> = ({ isVisible, onClose, onPost }) => 
     if (content.trim() || imageUri) {
       onPost({
         user: 'Bạn',
-        avatar: 'https://randomuser.me/api/portraits/men/1.jpg',
+        avatar: 'https://scontent.fsgn5-3.fna.fbcdn.net/v/t39.30808-6/480681851_1843038753128474_8873796576016633436_n.jpg?_nc_cat=104&ccb=1-7&_nc_sid=6ee11a&_nc_ohc=Ay-q9iTYjqMQ7kNvwERSrcX&_nc_oc=AdlLmpSpKAVUKaZu2XPDncMiodoItY-49xLkpiwDz3SC7d0AumbfyT8RD3iWdKQsCtg&_nc_zt=23&_nc_ht=scontent.fsgn5-3.fna&_nc_gid=M4yhnbpFX53mWI4v1LZc6Q&oh=00_AfLZOS4EzzLazs06gDk9P4hGRi4G-EDglGlgEIZkO1AkxQ&oe=682805AC',
         content: content.trim(),
-        image: imageUri || 'https://images.unsplash.com/photo-1523348837708-15d4a09cfac2?auto=format&fit=crop&w=600&q=80'
+        image: imageUri || '',
       });
       
       // Reset the modal
@@ -101,7 +101,7 @@ const PostModal: React.FC<PostModalProps> = ({ isVisible, onClose, onPost }) => 
             {/* User Info */}
             <View style={styles.userInfoContainer}>
               <Image 
-                source={{ uri: 'https://randomuser.me/api/portraits/men/1.jpg' }} 
+                source={{ uri: 'https://scontent.fsgn5-3.fna.fbcdn.net/v/t39.30808-6/480681851_1843038753128474_8873796576016633436_n.jpg?_nc_cat=104&ccb=1-7&_nc_sid=6ee11a&_nc_ohc=Ay-q9iTYjqMQ7kNvwERSrcX&_nc_oc=AdlLmpSpKAVUKaZu2XPDncMiodoItY-49xLkpiwDz3SC7d0AumbfyT8RD3iWdKQsCtg&_nc_zt=23&_nc_ht=scontent.fsgn5-3.fna&_nc_gid=M4yhnbpFX53mWI4v1LZc6Q&oh=00_AfLZOS4EzzLazs06gDk9P4hGRi4G-EDglGlgEIZkO1AkxQ&oe=682805AC'}} 
                 style={styles.userAvatar} 
               />
               <Text style={styles.userName}>Bạn</Text>
@@ -171,7 +171,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
-    height: '66%', // Changed to 2/3 of the screen
+    height: '70%', // Tăng kích thước từ 66% lên 70% để có nhiều không gian hơn cho ảnh
   },
   modalHeader: {
     flexDirection: 'row',
@@ -221,17 +221,19 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
   },
   contentInput: {
-    minHeight: 100,
+    minHeight: 50, // Giảm xuống còn nhỏ hơn để fit nội dung
     fontSize: 16,
     color: '#262626',
+    marginBottom: 2, // Khoảng cách rất nhỏ phía dưới phần input
   },
   imagePreviewContainer: {
     position: 'relative',
-    marginTop: 16,
+    marginTop: 4, // Khoảng cách rất nhỏ phía trên ảnh
+    marginBottom: 16,
   },
   imagePreview: {
     width: '100%',
-    height: 250,
+    height: 320, // Tăng chiều cao của ảnh từ 250px lên 320px
     borderRadius: 10,
   },
   removeImageButton: {

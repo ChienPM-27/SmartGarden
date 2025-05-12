@@ -177,7 +177,7 @@ const NavigationBar = () => {
 
 const styles = StyleSheet.create({
     shadow: {
-        shadowColor: '#DDDDDD',
+        shadowColor: '#3EB489',
         shadowOffset: {
             width: 0,
             height: 0,
