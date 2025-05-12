@@ -1,12 +1,43 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { View, Text, TouchableOpacity, ImageBackground } from 'react-native';
 import { useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 import { images } from '@/constants/images';
+import { Audio } from 'expo-av';
 
 export default function IntroScreen() {
     const router = useRouter();
+    const soundRef = useRef<Audio.Sound | null>(null);
+
+    useEffect(() => {
+        let isMounted = true;
+        (async () => {
+            try {
+                const { sound } = await Audio.Sound.createAsync(
+                    require('@/assets/sound/videoplayback.m4a'),
+                    {
+                        shouldPlay: true,
+                        isLooping: true,
+                        volume: 0.3,
+                    }
+                );
+                soundRef.current = sound;
+                if (isMounted) {
+                    await sound.playAsync();
+                }
+            } catch (e) {
+                // eslint-disable-next-line no-console
+                console.log('Error loading sound:', e);
+            }
+        })();
+        return () => {
+            isMounted = false;
+            if (soundRef.current) {
+                soundRef.current.unloadAsync();
+            }
+        };
+    }, []);
 
     const handleStart = () => {
         router.replace('/(tabs)/login');
@@ -14,13 +45,13 @@ export default function IntroScreen() {
 
     return (
         <ImageBackground
-            source={images.bg} // Giữ ảnh nền ở đây
+            source={images.bg}
             style={{ flex: 1, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 24 }}
             resizeMode="cover"
         >
             <Animated.View 
-                entering={FadeIn} // Animation khi xuất hiện
-                exiting={FadeOut} // Animation khi biến mất
+                entering={FadeIn}
+                exiting={FadeOut}
                 style={{ backgroundColor: 'rgba(255, 255, 255, 0.85)', borderRadius: 24, padding: 16, width: '100%', maxWidth: 360, alignItems: 'center' }}
             >
                 <StatusBar style="dark" />

@@ -147,17 +147,7 @@ const MyPlantsScreen = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <TouchableOpacity 
-          style={styles.backButton}
-          onPress={() => router.back()}
-        >
-          <MaterialIcons name="arrow-back" size={24} color="#166534" />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>My Plants</Text>
-        <View style={{ width: 24 }} />
-      </View>
-
+      {/* Đã xóa header, chỉ giữ lại phần nội dung và navigation bar */}
       {isLoading ? (
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#10B981" />
@@ -202,21 +192,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#DCFCE7',
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingVertical: 16,
-  },
-  backButton: {
-    padding: 8,
-  },
-  headerTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#166534',
   },
   loadingContainer: {
     flex: 1,
