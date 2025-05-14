@@ -1,4 +1,3 @@
-// app/(Main)/Home/HomeScreen.tsx - Improved version
 import React from 'react';
 import { View, StyleSheet, ScrollView, StatusBar, Platform } from 'react-native';
 
@@ -24,16 +23,19 @@ const HomeScreen = () => {
         <ScrollView 
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
-          bounces={Platform.OS === 'ios'} // iOS bounce effect
-          overScrollMode="never" // Better Android scroll behavior
+          bounces={Platform.OS === 'ios'} 
+          overScrollMode="never"
         >
           <WeatherSection />
           <ActionButtons />
-          <QuickActions />
-          <MyPlants />
+          
+          <View style={styles.mintContainer}>
+            <QuickActions />
+            <MyPlants />
+          </View>
+
         </ScrollView>
         
-        {/* Navigation bar with proper bottom safe area handling */}
         <View style={styles.navigationContainer}>
           <NavigationBar />
         </View>
@@ -49,7 +51,16 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     flexGrow: 1,
-    paddingBottom: Platform.OS === 'ios' ? 90 : 80, // Platform-specific padding
+    paddingBottom: Platform.OS === 'ios' ? 90 : 80,
+  },
+  mintContainer: {
+    flex: 1,
+    backgroundColor: '#ECFDF5',
+    marginTop: 12,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    paddingTop: 16,
+    paddingBottom: 16,
   },
   navigationContainer: {
     position: 'absolute',
@@ -57,10 +68,11 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     backgroundColor: '#FFF',
-    ...createShadow(5), // Cross-platform shadow
+    ...createShadow(5),
     borderTopLeftRadius: UI.borderRadius.medium,
     borderTopRightRadius: UI.borderRadius.medium,
   }
 });
 
 export default HomeScreen;
+""

@@ -69,7 +69,6 @@ const QuickActions = () => {
 
 const styles = StyleSheet.create({
   quickActionsContainer: {
-    backgroundColor: '#ECFDF5',
     paddingTop: 20,
     paddingHorizontal: 20,
     marginTop: 10,

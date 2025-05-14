@@ -85,7 +85,7 @@ const MyPlants = () => {
 
 const styles = StyleSheet.create({
   myPlantsContainer: {
-    backgroundColor: '#ECFDF5',
+    
     paddingHorizontal: 20,
     paddingBottom: 20,
   },
