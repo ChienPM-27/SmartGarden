@@ -55,17 +55,17 @@ const styles = StyleSheet.create({
   buttonText: {
     color: '#fff',
     fontWeight: '600',
-    fontSize: 14,
+    fontSize: 11,
   },
   scheduleButtonText: {
     color: '#fff',
     fontWeight: '600',
-    fontSize: 14,
+    fontSize: 11,
   },
   timezoneButtonText: {
     color: '#374151',
     fontWeight: '600',
-    fontSize: 14,
+    fontSize: 11,
   },
 });
 

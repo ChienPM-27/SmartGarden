@@ -1,8 +1,33 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Feather, MaterialCommunityIcons } from '@expo/vector-icons';
+import AddPlantModal from '@/components/Plants/AddPlantModal';
+import { Plant } from '@/components/Common/types';
+import StorageService from '@/components/services/storage/storageService';
+import { Alert } from 'react-native';
 
 const QuickActions = () => {
+  const [modalVisible, setModalVisible] = useState(false);
+
+  const handleAddPlant = async (newPlantData: Omit<Plant, 'id'>) => {
+    try {
+      const newPlant: Plant = {
+        ...newPlantData,
+        id: Date.now().toString(),
+      };
+
+      const storedPlants = await StorageService.loadPlants();
+      const updatedPlants = [...storedPlants, newPlant];
+      await StorageService.savePlants(updatedPlants);
+
+      setModalVisible(false);
+      Alert.alert('Success', 'Plant added successfully!');
+    } catch (error) {
+      console.error('Error adding plant:', error);
+      Alert.alert('Error', 'Failed to add plant');
+    }
+  };
+
   return (
     <View style={styles.quickActionsContainer}>
       <Text style={styles.sectionTitle}>Quick Actions</Text>
@@ -17,7 +42,7 @@ const QuickActions = () => {
         </TouchableOpacity>
 
         {/* Add Plants Button */}
-        <TouchableOpacity style={styles.quickActionButton}>
+        <TouchableOpacity style={styles.quickActionButton} onPress={() => setModalVisible(true)}>
           <View style={[styles.iconContainer, styles.addPlantsIconContainer]}>
             <Feather name="plus" size={24} color="white" />
           </View>
@@ -32,6 +57,12 @@ const QuickActions = () => {
           <Text style={styles.quickActionText}>Fertilize</Text>
         </TouchableOpacity>
       </View>
+
+      <AddPlantModal
+        visible={modalVisible}
+        handleCloseAddPlant={() => setModalVisible(false)}
+        handleSaveNewPlant={handleAddPlant}
+      />
     </View>
   );
 };
