@@ -55,10 +55,10 @@ const styles = StyleSheet.create({
   },
   mintContainer: {
     flex: 1,
-    backgroundColor: '#ECFDF5',
+    backgroundColor: '#C1FCE3',
     marginTop: 12,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
+    borderTopLeftRadius: 40,
+    borderTopRightRadius: 40, 
     paddingTop: 16,
     paddingBottom: 16,
   },

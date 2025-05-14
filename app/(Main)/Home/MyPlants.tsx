@@ -101,7 +101,7 @@ const styles = StyleSheet.create({
     marginBottom: 15,
   },
   viewAllButton: {
-    backgroundColor: '#4ADE80',
+    backgroundColor: '#1B9E82',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',

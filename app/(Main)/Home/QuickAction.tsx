@@ -69,7 +69,7 @@ const QuickActions = () => {
 
 const styles = StyleSheet.create({
   quickActionsContainer: {
-    paddingTop: 20,
+    paddingTop: 0,
     paddingHorizontal: 20,
     marginTop: 10,
   },
@@ -77,7 +77,8 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     color: '#065F46',
-    marginBottom: 15,
+    marginBottom: 20,
+    marginLeft: 10,
   },
   quickActionButtonsRow: {
     flexDirection: 'row',
@@ -89,8 +90,8 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   iconContainer: {
-    width: 60,
-    height: 60,
+    width: 70,
+    height: 70,
     borderRadius: 15,
     justifyContent: 'center',
     alignItems: 'center',
@@ -103,7 +104,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#4ADE80',
   },
   fertilizeIconContainer: {
-    backgroundColor: '#86EFAC',
+    backgroundColor: '#12866A',
   },
   quickActionText: {
     fontSize: 16,
