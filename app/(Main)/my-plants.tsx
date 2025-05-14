@@ -17,7 +17,7 @@ import PlantDetailModal from '@/components/Plants/PlantDetail/PlantDetailModal';
 import NavigationBar from '@/components/Common/NavigationBar';
 import PlantList from '@/components/Plants/PlantList';
 import AddPlantModal from '@/components/Plants/AddPlantModal';
-import StorageService from '@/components/services/storageService';
+import StorageService from '@/components/services/storage/storageService';
 import { router } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 

@@ -12,9 +12,9 @@ import {
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { Plant } from '@/components/Common/types';
-import ImagePickerService from '@/components/services/imagePickerService';
+import ImagePickerService from '@/components/services/utils/imagePickerService';
 import EditPlantModal from '../EditPLantModal';
-import StorageService from '@/components/services/storageService';
+import StorageService from '@/components/services/storage/storageService';
 
 interface PlantDetailModalProps {
     selectedPlant: Plant | null;

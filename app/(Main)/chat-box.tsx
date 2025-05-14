@@ -11,9 +11,11 @@ import {
     ActivityIndicator,
     Image,
     StyleSheet,
+    Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
+import { getAIResponse } from '@/components/services/geminiService';
 
 interface Message {
     id: string;
@@ -54,28 +56,32 @@ export default function App() {
 
         setMessages((prev) => [...prev, userMessage]);
         setInput('');
+        const tempImageUri = pendingImage;
         setPendingImage(null);
         setLoading(true);
 
-        const aiReply = await getAIResponse(input);
+        try {
+            const aiReply = await getAIResponse(input, tempImageUri || undefined);
 
-        const botMessage: Message = {
-            id: Date.now().toString() + 'bot',
-            text: aiReply,
-            sender: 'bot',
-        };
+            const botMessage: Message = {
+                id: Date.now().toString() + 'bot',
+                text: aiReply,
+                sender: 'bot',
+            };
 
-        setMessages((prev) => [...prev, botMessage]);
-        setLoading(false);
-
-        setTimeout(() => {
-            flatListRef.current?.scrollToEnd({ animated: true });
-        }, 300);
-    };
-
-    const getAIResponse = async (userText: string): Promise<string> => {
-        await new Promise((r) => setTimeout(r, 1000));
-        return `🌱 SmartBot trả lời: "${userText}"`;
+            setMessages((prev) => [...prev, botMessage]);
+        } catch (error) {
+            console.error('Lỗi khi gửi tin nhắn:', error);
+            Alert.alert(
+                'Lỗi',
+                'Không thể kết nối với SmartBot. Vui lòng kiểm tra kết nối Internet và thử lại.'
+            );
+        } finally {
+            setLoading(false);
+            setTimeout(() => {
+                flatListRef.current?.scrollToEnd({ animated: true });
+            }, 300);
+        }
     };
 
     const renderItem = ({ item }: { item: Message }) => {
@@ -99,7 +105,7 @@ export default function App() {
                         resizeMode="cover"
                     />
                     {item.text ? (
-                        <Text style={{ color: item.sender === 'user' ? '#fff' : '#000', marginTop: 8 }}>{item.text}</Text>
+                        <Text style={{ color: item.sender === 'user' ? '#fff' : '#000', marginTop: 8, padding: 8 }}>{item.text}</Text>
                     ) : null}
                 </View>
             );
@@ -127,7 +133,7 @@ export default function App() {
         <SafeAreaView style={[styles.container, { backgroundColor: '#f0fdf4' }]}> {/* Nền xanh nhạt hơn */}
             {/* Header Chat */}
             <View style={{ flexDirection: 'row', alignItems: 'center', padding: 14, backgroundColor: '#22c55e', borderBottomLeftRadius: 18, borderBottomRightRadius: 18, elevation: 2 }}>
-                <TouchableOpacity onPress={() => router.push('/(Main)/Home')} style={{ marginRight: 10 }}>
+                <TouchableOpacity onPress={() => router.push('/(Main)/Home/HomeScreen')} style={{ marginRight: 10 }}>
                     <Ionicons name="arrow-back" size={28} color="#fff" />
                 </TouchableOpacity>
                 <Text style={{ fontSize: 20, fontWeight: 'bold', color: '#fff', letterSpacing: 1 }}>SmartGarden Chat</Text>

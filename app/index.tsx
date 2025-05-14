@@ -40,7 +40,7 @@ export default function IntroScreen() {
     }, []);
 
     const handleStart = () => {
-        router.replace('/(tabs)/login');
+        router.replace('/(login)/login');
     };
 
     return (

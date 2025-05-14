@@ -106,7 +106,7 @@ const NavigationBar = () => {
                     setActiveTab(routeName);
                     switch (routeName) {
                         case 'home':
-                            router.push('/(Main)/Home');
+                            router.push('/(Main)/Home/HomeScreen');
                             break;
                         case 'my-plants':
                             router.push('/(Main)/my-plants');

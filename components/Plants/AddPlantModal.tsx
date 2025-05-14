@@ -11,7 +11,7 @@ import {
     ScrollView,
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
-import ImagePickerService from '@/components/services/imagePickerService';
+import ImagePickerService from '@/components/services/utils/imagePickerService';
 import { Plant } from '../Common/types';
 
 // Derive the type for MaterialIcon names. This should be at the top level of the module.
