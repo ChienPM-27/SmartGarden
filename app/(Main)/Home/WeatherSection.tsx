@@ -1,7 +1,7 @@
 // app/(Main)/Home/WeatherSection.tsx - Improved version
 import React from 'react';
 import { View, Text, StyleSheet, Image, Platform } from 'react-native';
-import { UI, createShadow } from '@/components/Common/CrossPlatformUtils';
+import { UI, createShadow } from '@/components/Common/cross-platform/CrossPlatformUtils';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Feather } from '@expo/vector-icons';
 
@@ -9,7 +9,7 @@ const WeatherSection = () => {
   return (
     <View style={styles.container}>
       <LinearGradient
-        colors={['#7DD3FC', '#38BDF8']}
+        colors={['#7DD3FC', '#38BDF8']} 
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         style={styles.weatherContainer}

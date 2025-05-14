@@ -3,8 +3,8 @@ import React from 'react';
 import { View, StyleSheet, ScrollView, StatusBar, Platform } from 'react-native';
 
 // Import our improved cross-platform components
-import SafeAreaWrapper from '@/components/Common/SafeAreaWrapper';
-import { UI, createShadow } from '@/components/Common/CrossPlatformUtils';
+import SafeAreaWrapper from '@/components/Common/cross-platform/SafeAreaWrapper';
+import { UI, createShadow } from '@/components/Common/cross-platform/CrossPlatformUtils';
 
 // Import existing components
 import WeatherSection from './WeatherSection';
@@ -53,7 +53,7 @@ const styles = StyleSheet.create({
   },
   navigationContainer: {
     position: 'absolute',
-    bottom: 0,
+    bottom: -34,
     left: 0,
     right: 0,
     backgroundColor: '#FFF',

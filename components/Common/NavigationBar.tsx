@@ -133,7 +133,7 @@ const NavigationBar = () => {
                 style={styles.bottomBar}
                 shadowStyle={styles.shadow}
                 height={55}
-                circleWidth={50}
+                circleWidth={55}
                 bgColor="white"
                 initialRouteName="home"
                 borderTopLeftRight
