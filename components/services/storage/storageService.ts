@@ -1,6 +1,6 @@
 // components/services/storageService.ts
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Plant } from '../../Common/types';
+import { Plant } from '../../types/PlantTypes';
 
 const STORAGE_KEY = 'SMART_GARDEN_PLANTS';
 

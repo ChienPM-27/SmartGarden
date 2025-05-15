@@ -11,9 +11,9 @@ import {
     ScrollView,
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
-import { Plant } from '@/components/Common/types';
+import { Plant } from '@/components/types/PlantTypes';
 import ImagePickerService from '@/components/services/utils/imagePickerService';
-import EditPlantModal from '../EditPLantModal';
+import EditPlantModal from '../Modal/EditPLantModal';
 import StorageService from '@/components/services/storage/storageService';
 
 interface PlantDetailModalProps {

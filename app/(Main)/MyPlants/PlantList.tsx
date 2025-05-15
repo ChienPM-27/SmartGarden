@@ -1,6 +1,6 @@
 import React from 'react';
 import { FlatList } from 'react-native';
-import { Plant } from '@/components/Common/types';
+import { Plant } from '@/components/types/PlantTypes';
 import PlantCard from './PlantCard';
 
 interface PlantListProps {

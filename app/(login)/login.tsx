@@ -74,7 +74,7 @@ export default function LoginScreen() {
         // Simulate login delay
         setTimeout(() => {
             setIsLoggingIn(false);
-            router.replace('/(Main)/Home/HomeScreen'); // Navigate directly to Home
+            router.replace('/(Main)/Home'); // Navigate directly to Home
         }, 1500);
     };
 

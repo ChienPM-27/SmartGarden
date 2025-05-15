@@ -58,7 +58,7 @@ const NavigationBar = () => {
                 // Chuyển hướng đến chat-box với ảnh
                 setActiveTab('chat-box');
                 router.push({
-                    pathname: '/(Main)/chat-box',
+                    pathname: '/(Main)/ChatBox',
                     params: { imageUri: result.assets[0].uri }
                 });
             }
@@ -106,13 +106,13 @@ const NavigationBar = () => {
                     setActiveTab(routeName);
                     switch (routeName) {
                         case 'home':
-                            router.push('/(Main)/Home/HomeScreen');
+                            router.push('/(Main)/Home');
                             break;
                         case 'my-plants':
-                            router.push('/(Main)/my-plants');
+                            router.push('/(Main)/MyPlants');
                             break;
                         case 'chat-box':
-                            router.push('/(Main)/chat-box');
+                            router.push('/(Main)/ChatBox');
                             break;
                         case 'setting':
                             router.push('/(Main)/community');

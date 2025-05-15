@@ -1,11 +1,10 @@
 // app/(Main)/Home/WeatherSection.tsx - Integrated with weatherStack API
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Image, Platform, ActivityIndicator } from 'react-native';
-import { UI, createShadow } from '@/components/Common/cross-platform/CrossPlatformUtils';
-import { LinearGradient } from 'expo-linear-gradient';
+import { UI } from '@/components/Common/cross-platform/CrossPlatformUtils';
 import { Feather } from '@expo/vector-icons';
 import { fetchWeather } from '@/components/services/weatherService';
-import { StatusBar } from 'expo-status-bar';
+import { StatusBar } from 'react-native';
 
 // Define weather data interface
 interface WeatherData {
@@ -63,7 +62,7 @@ const WeatherSection = () => {
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#38BDF8" />
+        <ActivityIndicator size="large" color="#FFFFFF" />
       </View>
     );
   }
@@ -72,14 +71,9 @@ const WeatherSection = () => {
   if (error) {
     return (
       <View style={styles.container}>
-        <LinearGradient
-          colors={['#7DD3FC', '#38BDF8']} 
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={styles.weatherContainer}
-        >
+        <View style={styles.weatherContainer}>
           <Text style={styles.errorText}>{error}</Text>
-        </LinearGradient>
+        </View>
       </View>
     );
   }
@@ -87,13 +81,7 @@ const WeatherSection = () => {
   // If we have data, show the weather
   return (
     <View style={styles.container}>
-      <StatusBar style="dark" />
-      <LinearGradient
-        colors={['#7DD3FC', '#38BDF8']} 
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={styles.weatherContainer}
-      >
+      <View style={styles.weatherContainer}>
         <View style={styles.temperatureContainer}>
           <Text style={styles.temperature}>{weather?.current.temperature}°C</Text>
           <Text style={styles.time}>{weather?.location.localtime ? formatTime(weather.location.localtime) : 'Unknown time'}</Text>
@@ -128,7 +116,7 @@ const WeatherSection = () => {
             />
           )}
         </View>
-      </LinearGradient>
+      </View>
     </View>
   );
 };
@@ -137,25 +125,11 @@ const styles = StyleSheet.create({
   container: {
     paddingHorizontal: UI.spacing.md,
     marginTop: UI.spacing.md,
-    ...Platform.select({
-      ios: {
-        shadowColor: '#7DD3FC',
-        shadowOffset: { width: 0, height: 8 },
-        shadowOpacity: 0.25,
-        shadowRadius: 12,
-      },
-      android: {
-        // Android specific shadow handling
-        elevation: 6,
-      },
-    }),
   },
   weatherContainer: {
-    padding: UI.spacing.md,
+    padding: UI.spacing.sm,
     flexDirection: 'row',
     justifyContent: 'space-between',
-    borderRadius: UI.borderRadius.large,
-    overflow: 'hidden',
   },
   temperatureContainer: {
     flex: 1,
@@ -231,13 +205,11 @@ const styles = StyleSheet.create({
     height: '100%',
   },
   loadingContainer: {
-    height: 160,
+    height: 120,
     justifyContent: 'center',
     alignItems: 'center',
     marginHorizontal: UI.spacing.md,
     marginTop: UI.spacing.md,
-    backgroundColor: 'rgba(125, 211, 252, 0.2)',
-    borderRadius: UI.borderRadius.large,
   },
   errorText: {
     fontSize: UI.fontSize.lg,

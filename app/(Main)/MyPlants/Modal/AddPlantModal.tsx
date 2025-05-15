@@ -4,51 +4,80 @@ import {
     View,
     Text,
     TouchableOpacity,
+    Image,
     TextInput,
     StyleSheet,
+    ActivityIndicator,
     ScrollView,
-    Alert,
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
-import { Plant } from '../Common/types';
+import ImagePickerService from '@/components/services/utils/imagePickerService';
+import { Plant } from '@/components/types/PlantTypes';  
 
+// Derive the type for MaterialIcon names. This should be at the top level of the module.
 type MaterialIconName = keyof typeof MaterialIcons.glyphMap;
 
-interface EditPlantModalProps {
+interface AddPlantModalProps {
     visible: boolean;
-    plant: Plant;
-    onClose: () => void;
-    onSave: (updatedPlant: Plant) => void;
+    handleCloseAddPlant: () => void;
+    handleSaveNewPlant: (newPlant: Omit<Plant, 'id'>) => void;
 }
 
-const EditPlantModal: React.FC<EditPlantModalProps> = ({
+const AddPlantModal: React.FC<AddPlantModalProps> = ({
     visible,
-    plant,
-    onClose,
-    onSave,
+    handleCloseAddPlant,
+    handleSaveNewPlant,
 }) => {
     const [name, setName] = useState('');
     const [scientificName, setScientificName] = useState('');
     const [waterStatus, setWaterStatus] = useState('');
     const [temperature, setTemperature] = useState('');
-    const [type, setType] = useState('');
-    const [progress, setProgress] = useState('');
-    const [description, setDescription] = useState('');
-    const [iconInput, setIconInput] = useState('');
+    const [type, setType] = useState('');             // For Plant.type: string
+    const [progress, setProgress] = useState('');       // For Plant.progress: string
+    const [description, setDescription] = useState(''); // For Plant.description: string
+    const [photoUri, setPhotoUri] = useState<string | null>(null); // Stays string | null from picker
+    const [iconInput, setIconInput] = useState<string>('eco'); // User input for icon name, defaults to 'eco'
+    const [isLoadingImage, setIsLoadingImage] = useState(false);
 
-    // Initialize form with plant data when modal opens
+    const resetState = () => {
+        setName('');
+        setScientificName('');
+        setWaterStatus('');
+        setTemperature('');
+        setType('');
+        setProgress('');
+        setDescription('');
+        setPhotoUri(null);
+        setIconInput('eco'); // Reset user input for icon
+        setIsLoadingImage(false);
+    };
+
     useEffect(() => {
-        if (visible && plant) {
-            setName(plant.name || '');
-            setScientificName(plant.scientificName || '');
-            setWaterStatus(plant.waterStatus || '');
-            setTemperature(plant.temperature || '');
-            setType(plant.type || '');
-            setProgress(plant.progress || '');
-            setDescription(plant.description || '');
-            setIconInput(plant.icon || 'eco');
+        if (!visible) {
+            const timer = setTimeout(() => {
+                resetState();
+            }, 300);
+            return () => clearTimeout(timer);
         }
-    }, [visible, plant]);
+    }, [visible]);
+
+    const handleLocalClose = () => {
+        handleCloseAddPlant();
+    };
+
+    const handleChangeImage = async () => {
+        try {
+            setIsLoadingImage(true);
+            const result = await ImagePickerService.pickImageFromGallery();
+            if (result && result.uri) {
+                setPhotoUri(result.uri);
+            }
+        } catch (error) {
+            console.log('Error while picking image: ', error);
+        } finally {
+            setIsLoadingImage(false);
+        }
+    };
 
     const handleSave = () => {
         if (!name.trim()) {
@@ -56,19 +85,40 @@ const EditPlantModal: React.FC<EditPlantModalProps> = ({
             return;
         }
 
-        const updatedPlant: Plant = {
-            ...plant,
+        // Additional validation for mandatory string fields if they cannot be empty strings
+        // For now, we'll allow empty strings if the user clears the input,
+        // as "" is a valid string.
+        // if (!type.trim() || !progress.trim() || !description.trim()) {
+        //     alert('Các trường Loại cây, Tiến độ, Mô tả không được để trống.');
+        //     return;
+        // }
+
+        const newPlantData: Omit<Plant, 'id'> = {
             name: name.trim(),
-            scientificName: scientificName.trim() || undefined,
-            waterStatus: waterStatus.trim() || undefined,
-            temperature: temperature.trim() || undefined,
+            scientificName: scientificName.trim() || undefined, // Assumes Plant.scientificName is optional (?: string)
+            waterStatus: waterStatus.trim() || undefined,       // Assumes Plant.waterStatus is optional (?: string)
+            temperature: temperature.trim() || undefined,     // Assumes Plant.temperature is optional (?: string)
+
+            // For fields that MUST be string (cannot be undefined)
+            // If the user clears the input, it becomes an empty string.
             type: type.trim(),
             progress: progress.trim(),
             description: description.trim(),
-            icon: (iconInput.trim() || 'eco') as MaterialIconName,
-        };
 
-        onSave(updatedPlant);
+            // photoUri is optional in Plant (photoUri?: string or string | undefined)
+            // Convert null from state to undefined for the Plant type
+            photoUri: photoUri === null ? undefined : photoUri,
+
+            // icon expects a specific MaterialIconName.
+            // We take the user's input string (or default 'eco') and cast it.
+            // This assumes 'eco' is a valid MaterialIconName.
+            // Type safety for arbitrary user input here is a compromise with free-text input.
+            icon: (iconInput.trim() || 'eco') as MaterialIconName,
+
+            imageUri: undefined, // New plants don't have a remote imageUri
+        };
+        handleSaveNewPlant(newPlantData);
+        handleLocalClose();
     };
 
     return (
@@ -76,17 +126,35 @@ const EditPlantModal: React.FC<EditPlantModalProps> = ({
             visible={visible}
             animationType="fade"
             transparent
-            onRequestClose={onClose}
+            onRequestClose={handleLocalClose}
         >
             <View style={styles.overlay}>
                 <View style={styles.modalContainer}>
                     <ScrollView style={{width: '100%'}} contentContainerStyle={styles.scrollViewContent}>
                         <View style={styles.header}>
-                            <Text style={styles.modalTitle}>Chỉnh sửa cây</Text>
-                            <TouchableOpacity onPress={onClose}>
+                            <Text style={styles.modalTitle}>Thêm cây mới</Text>
+                            <TouchableOpacity onPress={handleLocalClose}>
                                 <MaterialIcons name="close" size={28} color="#10B981" />
                             </TouchableOpacity>
                         </View>
+
+                        <View style={styles.imageContainer}>
+                            {isLoadingImage ? (
+                                <ActivityIndicator size="large" color="#10B981" />
+                            ) : photoUri ? (
+                                <Image
+                                    source={{ uri: photoUri }}
+                                    style={styles.plantImage}
+                                    resizeMode="cover"
+                                />
+                            ) : (
+                                <MaterialIcons name="image" size={64} color="#A1A1AA" />
+                            )}
+                        </View>
+
+                        <TouchableOpacity style={styles.actionButtonFullWidth} onPress={handleChangeImage}>
+                            <Text style={styles.buttonText}>{photoUri ? 'Thay đổi hình ảnh' : 'Thêm hình ảnh'}</Text>
+                        </TouchableOpacity>
 
                         <View style={styles.infoRow}>
                             <Text style={styles.label}>🪴 Tên cây:</Text>
@@ -132,7 +200,7 @@ const EditPlantModal: React.FC<EditPlantModalProps> = ({
                             <Text style={styles.label}>🌱 Loại cây:</Text>
                             <TextInput
                                 style={styles.valueInput}
-                                placeholder="Bắt buộc"
+                                placeholder="Bắt buộc nếu không có giá trị mặc định" // Clarify mandatory nature
                                 placeholderTextColor="#A1A1AA"
                                 value={type}
                                 onChangeText={setType}
@@ -142,7 +210,7 @@ const EditPlantModal: React.FC<EditPlantModalProps> = ({
                             <Text style={styles.label}>📊 Tiến độ:</Text>
                             <TextInput
                                 style={styles.valueInput}
-                                placeholder="Bắt buộc"
+                                placeholder="Bắt buộc nếu không có giá trị mặc định" // Clarify mandatory nature
                                 placeholderTextColor="#A1A1AA"
                                 value={progress}
                                 onChangeText={setProgress}
@@ -152,7 +220,7 @@ const EditPlantModal: React.FC<EditPlantModalProps> = ({
                             <Text style={styles.label}>📝 Mô tả:</Text>
                             <TextInput
                                 style={[styles.valueInput, styles.multilineInput]}
-                                placeholder="Bắt buộc"
+                                placeholder="Bắt buộc nếu không có giá trị mặc định" // Clarify mandatory nature
                                 placeholderTextColor="#A1A1AA"
                                 value={description}
                                 onChangeText={setDescription}
@@ -174,9 +242,9 @@ const EditPlantModal: React.FC<EditPlantModalProps> = ({
 
                         <View style={styles.buttonContainer}>
                             <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
-                                <Text style={styles.buttonText}>Lưu thay đổi</Text>
+                                <Text style={styles.buttonText}>Lưu cây</Text>
                             </TouchableOpacity>
-                            <TouchableOpacity style={styles.cancelButton} onPress={onClose}>
+                            <TouchableOpacity style={styles.cancelButton} onPress={handleLocalClose}>
                                 <Text style={styles.buttonText}>Hủy</Text>
                             </TouchableOpacity>
                         </View>
@@ -209,8 +277,8 @@ const styles = StyleSheet.create({
         elevation: 5,
     },
     scrollViewContent: {
-        alignItems: 'center',
-        width: '100%',
+      alignItems: 'center',
+      width: '100%',
     },
     header: {
         flexDirection: 'row',
@@ -224,6 +292,29 @@ const styles = StyleSheet.create({
         fontSize: 22,
         fontWeight: 'bold',
         color: '#14532D',
+    },
+    imageContainer: {
+        width: 200,
+        height: 150,
+        borderRadius: 12,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: '#F3F4F6',
+        marginVertical: 15,
+        overflow: 'hidden',
+    },
+    plantImage: {
+        width: '100%',
+        height: '100%',
+    },
+    actionButtonFullWidth: {
+        backgroundColor: '#10B981',
+        paddingVertical: 12,
+        borderRadius: 8,
+        marginTop: 0,
+        marginBottom: 20,
+        width: '100%',
+        alignItems: 'center',
     },
     infoRow: {
         flexDirection: 'row',
@@ -290,4 +381,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default EditPlantModal;
+export default AddPlantModal;

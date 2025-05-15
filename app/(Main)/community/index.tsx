@@ -62,7 +62,7 @@
             >
               <MaterialIcons name="add" size={24} color="#166534" />
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => router.push('/(Main)/chat-box')}>
+            <TouchableOpacity onPress={() => router.push('/(Main)/ChatBox')}>
               <AntDesign name="message1" size={24} color="#166534" />
             </TouchableOpacity>
           </View>

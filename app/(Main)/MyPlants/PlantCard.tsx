@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, Image, TouchableOpacity, StyleSheet } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
-import { Plant } from '@/components/Common/types';
+import { Plant } from '@/components/types/PlantTypes';
 
 interface PlantCardProps {
   plant: Plant;

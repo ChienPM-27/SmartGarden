@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image, ActivityIndicator } from 'react-native';
 import { Feather, MaterialIcons } from '@expo/vector-icons';
 import PlantItem from './PlantItem';
-import { Plant } from '@/components/Common/types';
+import { Plant } from '@/components/types/PlantTypes';
 import StorageService from '@/components/services/storage/storageService';
 import { router } from 'expo-router';
 

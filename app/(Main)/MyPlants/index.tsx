@@ -10,13 +10,13 @@ import {
   Alert,
 } from 'react-native';
 import { useFonts } from 'expo-font';
-import { Plant, initialPlantsData } from '@/components/Common/types';
-import SearchBar from '@/components/Plants/SearchBar';
-import FilterModal from '@/components/Plants/FilterModal';
-import PlantDetailModal from '@/components/Plants/PlantDetail/PlantDetailModal';
+import { Plant, initialPlantsData } from '@/components/types/PlantTypes';
+import SearchBar from '@/app/(Main)/MyPlants/SearchBar';
+import FilterModal from '@/app/(Main)/MyPlants/Modal/FilterModal';
+import PlantDetailModal from '@/app/(Main)/MyPlants/PlantDetail/PlantDetailModal';
 import NavigationBar from '@/components/Common/NavigationBar';
-import PlantList from '@/components/Plants/PlantList';
-import AddPlantModal from '@/components/Plants/AddPlantModal';
+import PlantList from '@/app/(Main)/MyPlants/PlantList';
+import AddPlantModal from '@/app/(Main)/MyPlants/Modal/AddPlantModal';
 import StorageService from '@/components/services/storage/storageService';
 import { router } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';

@@ -8,15 +8,15 @@ const _Layout = () => {
             }}
         >
             <Tabs.Screen
-                name="chat-box"
+                name="ChatBox/index"
                 options={{
-                    title: 'chat-box',
+                    title: 'ChatBox',
                     headerShown: false,
                     tabBarButton: () => null,
                 }}
             />
             <Tabs.Screen
-                name="Home/HomeScreen"
+                name="Home/index"
                 options={{
                     title: 'Home',
                     headerShown: false,
@@ -24,9 +24,9 @@ const _Layout = () => {
                 }}
             />
             <Tabs.Screen
-                name="my-plants"
+                name="MyPlants/index"
                 options={{
-                    title: 'my-plants',
+                    title: 'MyPlants',
                     headerShown: false,
                     tabBarButton: () => null,
                 }}
@@ -35,14 +35,6 @@ const _Layout = () => {
                 name="community/index"
                 options={{
                     title: 'community',
-                    headerShown: false,
-                    tabBarButton: () => null,
-                }}
-            />
-            <Tabs.Screen
-                name="profile"
-                options={{
-                    title: 'profile',
                     headerShown: false,
                     tabBarButton: () => null,
                 }}

@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, StyleSheet, ScrollView, StatusBar, Platform } from 'react-native';
+import { View, StyleSheet, ScrollView, Platform } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 
 // Import our improved cross-platform components
 import SafeAreaWrapper from '@/components/Common/cross-platform/SafeAreaWrapper';
@@ -11,43 +12,49 @@ import ActionButtons from './ActionButtons';
 import QuickActions from './QuickAction';
 import MyPlants from './MyPlants';
 import NavigationBar from '@/components/Common/NavigationBar';
+import { StatusBar } from 'expo-status-bar';
 
 const HomeScreen = () => {
   return (
-    <SafeAreaWrapper 
-      backgroundColor="#ECFDF5"
-      statusBarColor="#7DD3FC"
-      statusBarStyle="light-content"
-    >
-      <View style={styles.container}>
-        <ScrollView 
-          contentContainerStyle={styles.scrollContent}
-          showsVerticalScrollIndicator={false}
-          bounces={Platform.OS === 'ios'} 
-          overScrollMode="never"
-        >
-          <WeatherSection />
-          <ActionButtons />
-          
-          <View style={styles.mintContainer}>
-            <QuickActions />
-            <MyPlants />
-          </View>
+    <SafeAreaWrapper >  
+      <LinearGradient
+        colors={['#7DD3FC', '#38BDF8']} 
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={styles.gradientBackground}
+      >
+        <View style={styles.container}>
+          <ScrollView 
+            contentContainerStyle={styles.scrollContent}
+            showsVerticalScrollIndicator={false}
+            bounces={Platform.OS === 'ios'} 
+            overScrollMode="never"
+          >
+            <WeatherSection />
+            <ActionButtons />
+            
+            <View style={styles.mintContainer}>
+              <QuickActions />
+              <MyPlants />
+            </View>
 
-        </ScrollView>
-        
-        <View style={styles.navigationContainer}>
-          <NavigationBar />
+          </ScrollView>
+          
+          <View style={styles.navigationContainer}>
+            <NavigationBar />
+          </View>
         </View>
-      </View>
+      </LinearGradient>
     </SafeAreaWrapper>
   );
 };
 
 const styles = StyleSheet.create({
+  gradientBackground: {
+    flex: 1,
+  },
   container: {
     flex: 1,
-    backgroundColor: '#ECFDF5',
   },
   scrollContent: {
     flexGrow: 1,
@@ -75,4 +82,3 @@ const styles = StyleSheet.create({
 });
 
 export default HomeScreen;
-""

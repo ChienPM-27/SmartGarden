@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Feather, MaterialCommunityIcons } from '@expo/vector-icons';
-import AddPlantModal from '@/components/Plants/AddPlantModal';
-import { Plant } from '@/components/Common/types';
+import AddPlantModal from '@/app/(Main)/MyPlants/Modal/AddPlantModal';
+import { Plant } from '@/components/types/PlantTypes';
 import StorageService from '@/components/services/storage/storageService';
 import { Alert } from 'react-native';
 
