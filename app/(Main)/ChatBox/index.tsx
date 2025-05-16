@@ -12,37 +12,67 @@ import {
     Image,
     StyleSheet,
     Alert,
+    Animated,
+    Dimensions,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { getAIResponse } from '@/components/services/geminiService';
+import styles from './chatbox.styles';
 
 interface Message {
     id: string;
     text?: string;
     imageUri?: string;
     sender: 'user' | 'bot';
+    timestamp: number;
 }
 
-export default function App() {
+const formatTime = (timestamp: number): string => {
+    const date = new Date(timestamp);
+    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+};
+
+export default function ChatBox() {
     const [messages, setMessages] = useState<Message[]>([]);
     const [input, setInput] = useState('');
     const [loading, setLoading] = useState(false);
-    const [pendingImage, setPendingImage] = useState<string | null>(null); // ảnh chờ gửi
+    const [pendingImage, setPendingImage] = useState<string | null>(null);
     const flatListRef = useRef<FlatList<Message>>(null);
+    const inputRef = useRef<TextInput>(null);
     const { imageUri } = useLocalSearchParams();
     const router = useRouter();
+    const fadeAnim = useRef(new Animated.Value(0)).current;
+    const screenWidth = Dimensions.get('window').width;
+    
+    // Initial welcome message
+    useEffect(() => {
+        if (messages.length === 0) {
+            const welcomeMessage: Message = {
+                id: 'welcome',
+                text: 'Chào mừng bạn đến với SmartGarden! Tôi có thể giúp gì cho bạn về cây trồng?',
+                sender: 'bot',
+                timestamp: Date.now(),
+            };
+            setMessages([welcomeMessage]);
+        }
+    }, []);
 
-    // Khi nhận imageUri mới, lưu vào pendingImage
+    // Handle new image from camera or gallery
     useEffect(() => {
         if (imageUri) {
             const uri = Array.isArray(imageUri) ? imageUri[0] : imageUri;
             if (uri !== pendingImage) {
                 setPendingImage(uri);
+                // Animate the image appearance
+                Animated.timing(fadeAnim, {
+                    toValue: 1,
+                    duration: 300,
+                    useNativeDriver: true,
+                }).start();
             }
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [imageUri]);
+    }, [imageUri, fadeAnim]);
 
     const handleSend = async () => {
         if (!input.trim() && !pendingImage) return;
@@ -52,6 +82,7 @@ export default function App() {
             text: input || undefined,
             imageUri: pendingImage || undefined,
             sender: 'user',
+            timestamp: Date.now(),
         };
 
         setMessages((prev) => [...prev, userMessage]);
@@ -59,6 +90,7 @@ export default function App() {
         const tempImageUri = pendingImage;
         setPendingImage(null);
         setLoading(true);
+        fadeAnim.setValue(0); // Reset fade animation
 
         try {
             const aiReply = await getAIResponse(input, tempImageUri || undefined);
@@ -67,6 +99,7 @@ export default function App() {
                 id: Date.now().toString() + 'bot',
                 text: aiReply,
                 sender: 'bot',
+                timestamp: Date.now(),
             };
 
             setMessages((prev) => [...prev, botMessage]);
@@ -84,124 +117,201 @@ export default function App() {
         }
     };
 
-    const renderItem = ({ item }: { item: Message }) => {
-        if (item.imageUri) {
+    const renderDay = ({ item, index }: { item: Message; index: number }) => {
+        const currentDate = new Date(item.timestamp).toLocaleDateString();
+        const prevDate = index > 0 
+            ? new Date(messages[index - 1].timestamp).toLocaleDateString() 
+            : null;
+        
+        if (index === 0 || currentDate !== prevDate) {
             return (
-                <View
-                    style={[
-                        {
-                            alignSelf: item.sender === 'user' ? 'flex-end' : 'flex-start',
-                            backgroundColor: item.sender === 'user' ? '#22c55e' : '#e5e7eb',
-                            borderRadius: 16,
-                            marginVertical: 4,
-                            maxWidth: '80%',
-                            padding: 4,
-                        },
-                    ]}
-                >
-                    <Image
-                        source={{ uri: item.imageUri }}
-                        style={{ width: 180, height: 180, borderRadius: 12 }}
-                        resizeMode="cover"
-                    />
-                    {item.text ? (
-                        <Text style={{ color: item.sender === 'user' ? '#fff' : '#000', marginTop: 8, padding: 8 }}>{item.text}</Text>
-                    ) : null}
+                <View style={styles.dayContainer}>
+                    <Text style={styles.dayText}>{currentDate}</Text>
                 </View>
             );
         }
+        return null;
+    };
+
+    const renderItem = ({ item, index }: { item: Message; index: number }) => {
+        const dayHeader = renderDay({ item, index });
+        
+        const isUser = item.sender === 'user';
+        const bubbleStyle = isUser ? styles.userBubble : styles.botBubble;
+        const textStyle = isUser ? styles.userText : styles.botText;
+        
         return (
-            <View
-                style={[
-                    {
-                        alignSelf: item.sender === 'user' ? 'flex-end' : 'flex-start',
-                        backgroundColor: item.sender === 'user' ? '#22c55e' : '#e5e7eb',
-                        borderRadius: 16,
-                        marginVertical: 4,
-                        maxWidth: '80%',
-                        paddingHorizontal: 12,
-                        paddingVertical: 8,
-                    },
-                ]}
-            >
-                <Text style={{ color: item.sender === 'user' ? '#fff' : '#000' }}>{item.text}</Text>
-            </View>
+            <>
+                {dayHeader}
+                <View style={[styles.messageContainer, isUser ? styles.userContainer : styles.botContainer]}>
+                    {!isUser && (
+                        <View style={styles.avatarContainer}>
+                            <View style={styles.avatar}>
+                                <Ionicons name="leaf" size={14} color="#fff" />
+                            </View>
+                        </View>
+                    )}
+                    
+                    <View style={[styles.bubbleWrapper, isUser ? styles.userBubbleWrapper : styles.botBubbleWrapper]}>
+                        <View style={bubbleStyle}>
+                            {item.imageUri ? (
+                                <View>
+                                    <Image
+                                        source={{ uri: item.imageUri }}
+                                        style={styles.messageImage}
+                                        resizeMode="cover"
+                                    />
+                                    {item.text ? (
+                                        <Text style={[textStyle, styles.imageCaption]}>{item.text}</Text>
+                                    ) : null}
+                                </View>
+                            ) : (
+                                <Text style={textStyle}>{item.text}</Text>
+                            )}
+                            <Text style={[styles.timestamp, isUser ? styles.userTimestamp : styles.botTimestamp]}>
+                                {formatTime(item.timestamp)}
+                            </Text>
+                        </View>
+                    </View>
+                </View>
+            </>
+        );
+    };
+
+    const openCameraOptions = () => {
+        Alert.alert(
+            'Chụp ảnh cây trồng',
+            'Chọn nguồn ảnh',
+            [
+                {
+                    text: 'Máy ảnh',
+                    onPress: () => router.push('./CameraScreen'),
+                },
+                {
+                    text: 'Thư viện',
+                    onPress: () => router.push('./GalleryScreen'),
+                },
+                {
+                    text: 'Huỷ',
+                    style: 'cancel',
+                },
+            ],
+            { cancelable: true }
         );
     };
 
     return (
-        <SafeAreaView style={[styles.container, { backgroundColor: '#f0fdf4' }]}> {/* Nền xanh nhạt hơn */}
-            {/* Header Chat */}
-            <View style={{ flexDirection: 'row', alignItems: 'center', padding: 14, backgroundColor: '#22c55e', borderBottomLeftRadius: 18, borderBottomRightRadius: 18, elevation: 2 }}>
-                <TouchableOpacity onPress={() => router.push('/(Main)/Home')} style={{ marginRight: 10 }}>
-                    <Ionicons name="arrow-back" size={28} color="#fff" />
+        <SafeAreaView style={styles.container}>
+            {/* Chat Header */}
+            <View style={styles.header}>
+                <TouchableOpacity onPress={() => router.push('/(Main)/Home')} style={styles.backButton}>
+                    <Ionicons name="arrow-back" size={24} color="#fff" />
                 </TouchableOpacity>
-                <Text style={{ fontSize: 20, fontWeight: 'bold', color: '#fff', letterSpacing: 1 }}>SmartGarden Chat</Text>
+                <View style={styles.headerContent}>
+                    <Text style={styles.headerTitle}>SmartGarden</Text>
+                    <Text style={styles.headerSubtitle}>Trợ lý thông minh</Text>
+                </View>
+                <TouchableOpacity style={styles.menuButton}>
+                    <Ionicons name="menu" size={24} color="#fff" />
+                </TouchableOpacity>
             </View>
+
+            {/* Chat List */}
             <FlatList
                 ref={flatListRef}
                 data={messages}
                 renderItem={renderItem}
                 keyExtractor={(item) => item.id}
-                contentContainerStyle={{ padding: 14, paddingBottom: 80 }}
+                contentContainerStyle={styles.listContent}
                 showsVerticalScrollIndicator={false}
+                initialNumToRender={15}
+                onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: true })}
+                ListHeaderComponent={
+                    <View style={styles.welcomeBanner}>
+                        <Image 
+                            source={require('@/assets/images/logo.png')} 
+                            style={styles.welcomeImage}
+                            defaultSource={require('@/assets/images/logo.png')}
+                        />
+                        <Text style={styles.welcomeText}>Chào mừng đến với SmartGarden!</Text>
+                    </View>
+                }
             />
 
+            {/* Typing Indicator */}
             {loading && (
-                <View style={{ alignSelf: 'flex-start', backgroundColor: '#e0e7ef', borderRadius: 16, margin: 8, padding: 10, flexDirection: 'row', alignItems: 'center' }}>
-                    <ActivityIndicator size="small" color="#22c55e" style={{ marginRight: 8 }} />
-                    <Text style={{ color: '#166534', fontStyle: 'italic' }}>SmartBot đang trả lời...</Text>
+                <View style={styles.typingContainer}>
+                    <View style={styles.typingAvatar}>
+                        <Ionicons name="leaf" size={12} color="#fff" />
+                    </View>
+                    <View style={styles.typingBubble}>
+                        <View style={styles.typingDots}>
+                            <View style={[styles.typingDot, styles.typingDot1]} />
+                            <View style={[styles.typingDot, styles.typingDot2]} />
+                            <View style={[styles.typingDot, styles.typingDot3]} />
+                        </View>
+                    </View>
                 </View>
             )}
 
-            {/* Hàng chờ gửi ảnh */}
+            {/* Pending Image Preview */}
             {pendingImage && (
-                <View style={{ alignSelf: 'flex-end', marginRight: 16, marginBottom: 8 }}>
-                    <View style={{ position: 'relative' }}>
+                <Animated.View style={[styles.pendingImageContainer, { opacity: fadeAnim }]}>
+                    <View style={styles.pendingImageWrapper}>
                         <Image
                             source={{ uri: pendingImage }}
-                            style={{ width: 90, height: 90, borderRadius: 14, borderWidth: 2, borderColor: '#22c55e' }}
+                            style={styles.pendingImage}
                         />
                         <TouchableOpacity
-                            style={{ position: 'absolute', top: -8, right: -8, backgroundColor: '#fff', borderRadius: 12, padding: 2, elevation: 2 }}
+                            style={styles.removeImageButton}
                             onPress={() => setPendingImage(null)}
                         >
                             <Ionicons name="close-circle" size={22} color="#ef4444" />
                         </TouchableOpacity>
                     </View>
-                </View>
+                </Animated.View>
             )}
 
+            {/* Input Area */}
             <KeyboardAvoidingView
                 behavior={Platform.OS === 'ios' ? 'padding' : undefined}
                 keyboardVerticalOffset={90}
             >
-                <View style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 10, borderTopWidth: 1, borderColor: '#e5e7eb', backgroundColor: '#fff', borderTopLeftRadius: 18, borderTopRightRadius: 18 }}>
+                <View style={styles.inputContainer}>
+                    <TouchableOpacity style={styles.cameraButton} onPress={openCameraOptions}>
+                        <Ionicons name="camera" size={24} color="#22c55e" />
+                    </TouchableOpacity>
+                    
                     <TextInput
-                        style={{ flex: 1, height: 48, borderRadius: 24, backgroundColor: '#f3f4f6', paddingHorizontal: 16, color: '#000', fontSize: 16, marginRight: 8, borderWidth: 1, borderColor: '#bbf7d0' }}
-                        placeholder="Nhập câu hỏi..."
+                        ref={inputRef}
+                        style={styles.textInput}
+                        placeholder="Hỏi về cây trồng của bạn..."
                         value={input}
                         onChangeText={setInput}
                         multiline
+                        maxLength={500}
                         placeholderTextColor="#6ee7b7"
+                        onFocus={() => setTimeout(() => flatListRef.current?.scrollToEnd({ animated: true }), 100)}
                     />
-                    <TouchableOpacity onPress={handleSend} style={{ marginLeft: 4, backgroundColor: '#22c55e', borderRadius: 24, padding: 10 }} disabled={loading}>
+                    
+                    <TouchableOpacity 
+                        onPress={handleSend} 
+                        style={[styles.sendButton, (!input.trim() && !pendingImage) ? styles.sendButtonDisabled : null]} 
+                        disabled={loading || (!input.trim() && !pendingImage)}
+                    >
                         {loading ? (
                             <ActivityIndicator size="small" color="#fff" />
                         ) : (
-                            <Ionicons name="send" size={22} color="#fff" />
+                            <Ionicons name="send" size={18} color="#fff" />
                         )}
                     </TouchableOpacity>
+                </View>
+                
+                <View style={styles.inputFooter}>
+                    <Text style={styles.poweredBy}>Powered by Gemini AI</Text>
                 </View>
             </KeyboardAvoidingView>
         </SafeAreaView>
     );
 }
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: '#fff',
-        padding: 0,
-    },
-});

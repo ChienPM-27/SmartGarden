@@ -34,8 +34,20 @@
       "favicon": "./assets/images/logo.png"
     },
     "plugins": [
-      "expo-camera",
-      "expo-image-picker",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Cho phép SmartGarden truy cập vào máy ảnh để chụp ảnh cây trồng."
+        }
+      ],
+      [
+        "expo-media-library",
+        {
+          "photosPermission": "Cho phép SmartGarden truy cập vào thư viện ảnh để chọn ảnh cây trồng.",
+          "savePhotosPermission": "Cho phép SmartGarden lưu ảnh cây trồng vào thư viện.",
+          "isAccessMediaLocationEnabled": true
+        }
+      ],
       "expo-router",
       [
         "expo-splash-screen",
