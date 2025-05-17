@@ -31,7 +31,7 @@ const MyPlants = () => {
 
   const handleViewAll = () => {
     // Navigate to the My Plants screen
-    router.push('/my-plants');
+    router.push('/MyPlants');
   };
 
   if (isLoading) {

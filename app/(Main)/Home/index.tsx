@@ -1,8 +1,8 @@
-import React, { useRef } from 'react';
-import { View, StyleSheet, Platform, Animated } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
+import React, { useRef, useEffect, useState } from 'react';
+import { View, StyleSheet, Platform, Animated, Dimensions } from 'react-native';
 import { SafeAreaView } from 'react-native';
 import { UI, createShadow } from '@/components/Common/cross-platform/CrossPlatformUtils';
+import { LinearGradient } from 'expo-linear-gradient';
 
 import WeatherSection from './WeatherSection';
 import ActionButtons from './ActionButtons';
@@ -12,9 +12,18 @@ import NavigationBar from '@/components/Common/NavigationBar';
 import { StatusBar } from 'expo-status-bar';
 
 const WEATHER_SECTION_HEIGHT = 150;
+const NAVIGATION_HEIGHT = 70;
 
 const HomeScreen = () => {
   const scrollY = useRef(new Animated.Value(0)).current;
+  const [mintContainerHeight, setMintContainerHeight] = useState(0);
+  const { height: screenHeight } = Dimensions.get('window');
+
+  useEffect(() => {
+    // Chiều cao còn lại = chiều cao màn hình - phần trên (WEATHER_SECTION_HEIGHT + 60) - thanh điều hướng - padding
+    const remainingHeight = screenHeight - (WEATHER_SECTION_HEIGHT + 60) - NAVIGATION_HEIGHT;
+    setMintContainerHeight(remainingHeight);
+  }, [screenHeight]);
 
   const weatherOpacity = scrollY.interpolate({
     inputRange: [0, WEATHER_SECTION_HEIGHT / 2, WEATHER_SECTION_HEIGHT],
@@ -28,50 +37,54 @@ const HomeScreen = () => {
     extrapolate: 'clamp',
   });
 
+  // Giới hạn cuộn
+  const handleScroll = Animated.event(
+    [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+    { useNativeDriver: true }
+  );
+
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#7DD3FC' }}>  
-      <StatusBar style="auto"/>
-      <LinearGradient
-        colors={['#7DD3FC', '#38BDF8']} 
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={styles.gradientBackground}
-      >
-        <View style={styles.container}>
-          <Animated.View 
-            style={[
-              styles.weatherSectionContainer,
-              { 
-                opacity: weatherOpacity,
-                transform: [{ translateY: weatherTranslateY }]
-              }
-            ]}
-          >
-            <WeatherSection />
-            <ActionButtons />
-          </Animated.View>
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#256dff' }}>  
+      <StatusBar style="light"/>
+      <View style={styles.container}>
+        {/* Gradient chỉ áp dụng cho phần trên của màn hình */}
+        <LinearGradient
+          colors={['#256dff', '#75d2f9']}
+          style={styles.backgroundGradient}
+        />
 
-          <Animated.ScrollView 
-            contentContainerStyle={styles.scrollContent}
-            showsVerticalScrollIndicator={false}
-            bounces={Platform.OS === 'ios'} 
-            overScrollMode="never"
-            scrollEventThrottle={16}
-            onScroll={Animated.event(
-              [{ nativeEvent: { contentOffset: { y: scrollY } } }],
-              { useNativeDriver: true }
-            )}
-          >
-            <View style={{ height: WEATHER_SECTION_HEIGHT + 60 }} />
-            <View style={styles.mintContainer}>
-              <QuickActions />
-              <MyPlants />
-            </View>
-          </Animated.ScrollView>
-        </View>
-      </LinearGradient>
+        <Animated.View 
+          style={[
+            styles.weatherSectionContainer,
+            { 
+              opacity: weatherOpacity,
+              transform: [{ translateY: weatherTranslateY }]
+            }
+          ]}
+        >
+          <WeatherSection />
+          <ActionButtons />
+        </Animated.View>
 
-      {/* Thanh Navigation Bar, nằm bên ngoài LinearGradient */}
+        <Animated.ScrollView 
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+          bounces={false} // Tắt bounce để tránh thấy nền
+          overScrollMode="never"
+          scrollEventThrottle={16}
+          onScroll={handleScroll}
+        >
+          <View style={{ height: WEATHER_SECTION_HEIGHT + 60 }} />
+          <View style={[
+            styles.mintContainer,
+            { minHeight: Math.max(mintContainerHeight, Platform.OS === 'ios' ? 500 : 450) }
+          ]}>
+            <QuickActions />
+            <MyPlants />
+          </View>
+        </Animated.ScrollView>
+      </View>
+
       <View style={styles.navigationContainer}>
         <NavigationBar />
       </View>
@@ -80,8 +93,12 @@ const HomeScreen = () => {
 };
 
 const styles = StyleSheet.create({
-  gradientBackground: {
-    flex: 1,
+  backgroundGradient: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    top: 0,
+    height: WEATHER_SECTION_HEIGHT + 100, // Chỉ cao đến đầu mintContainer
   },
   container: {
     flex: 1,
@@ -95,7 +112,6 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     flexGrow: 1,
-    paddingBottom: Platform.OS === 'ios' ? 120 : 100, // Chỉnh lại padding để không bị trống
   },
   mintContainer: {
     flex: 1,
@@ -103,17 +119,16 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 40,
     borderTopRightRadius: 40, 
     paddingTop: 16,
-    paddingBottom: 16,
+    paddingBottom: 70,
   },
   navigationContainer: {
-    position: 'absolute', // Chuyển về absolute
+    position: 'absolute',
     bottom: 0,
-    left: 0,
+    left: 0,  
     right: 0,
-    height: 70, // Cố định chiều cao của navigation
-    ...createShadow(5),
-    borderTopLeftRadius: UI.borderRadius.medium,
-    borderTopRightRadius: UI.borderRadius.medium,
+    zIndex: 20,
+    backgroundColor: 'transparent',
+    height: NAVIGATION_HEIGHT,
   },
 });
 
