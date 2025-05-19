@@ -15,11 +15,12 @@ import SearchBar from '@/app/(Main)/MyPlants/SearchBar';
 import FilterModal from '@/app/(Main)/MyPlants/Modal/FilterModal';
 import PlantDetailModal from '@/app/(Main)/MyPlants/PlantDetail/PlantDetailModal';
 import NavigationBar from '@/components/Common/NavigationBar';
-import PlantList from '@/app/(Main)/MyPlants/PlantList';
+import PlantList from '@/app/(Main)/MyPlants/List/PlantList';
 import AddPlantModal from '@/app/(Main)/MyPlants/Modal/AddPlantModal';
 import StorageService from '@/components/services/storage/storageService';
 import { router } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { StatusBar } from 'expo-status-bar';
 
 const images = {
   logo: require('@/assets/icons/logo.png'),
@@ -205,6 +206,7 @@ const SmartGardenHome = () => {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#DCFCE7' }}>
+      <StatusBar style="dark" />
       <View
         style={{
           paddingHorizontal: 20,

@@ -8,11 +8,12 @@ import {
     Dimensions,
 } from 'react-native';
 import { CurvedBottomBarExpo } from 'react-native-curved-bottom-bar';
-import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import { MaterialIcons } from '@expo/vector-icons';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { Ionicons } from '@expo/vector-icons';
 import { useRouter, usePathname } from 'expo-router';
 import { Camera } from 'expo-camera';
 import * as ImagePicker from 'expo-image-picker';
-import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 
 const { height: screenHeight } = Dimensions.get('window');
 
@@ -23,14 +24,13 @@ const NavigationBar = () => {
     const [hasCameraPermission, setHasCameraPermission] = useState<boolean | null>(null);
 
     useEffect(() => {
-        // Cập nhật activeTab dựa trên pathname hiện tại
-        if (pathname.includes('Home')) {
+        if (pathname.includes('/Home')) {
             setActiveTab('home');
-        } else if (pathname.includes('my-plants')) {
+        } else if (pathname.includes('/MyPlants')) {
             setActiveTab('my-plants');
-        } else if (pathname.includes('chat-box')) {
+        } else if (pathname.includes('/ChatBox')) {
             setActiveTab('chat-box');
-        } else if (pathname.includes('community')) {
+        } else if (pathname.includes('/community')) {
             setActiveTab('setting');
         }
     }, [pathname]);
@@ -55,7 +55,6 @@ const NavigationBar = () => {
             });
 
             if (!result.canceled) {
-                // Chuyển hướng đến chat-box với ảnh
                 setActiveTab('chat-box');
                 router.push({
                     pathname: '/(Main)/ChatBox',
@@ -68,28 +67,33 @@ const NavigationBar = () => {
     };
 
     const _renderIcon = (routeName: string) => {
-        let icon: 'home' | 'list' | 'chat' | 'person' = 'home';
-        
+        let icon: string = 'home';
+        let IconComponent: any = MaterialIcons;
+
         switch (routeName) {
             case 'home':
                 icon = 'home';
+                IconComponent = MaterialIcons;
                 break;
             case 'my-plants':
                 icon = 'list';
+                IconComponent = MaterialIcons;
                 break;
             case 'chat-box':
-                icon = 'chat';
+                icon = 'robot-excited-outline';
+                IconComponent = MaterialCommunityIcons;
                 break;
             case 'setting':
-                icon = 'person';
+                icon = 'people';
+                IconComponent = Ionicons;
                 break;
         }
 
         const isActive = routeName === activeTab;
-        
+
         return (
             <View style={styles.iconContainer}>
-                <MaterialIcons
+                <IconComponent
                     name={icon}
                     size={25}
                     color={isActive ? '#10B981' : '#808080'}
@@ -175,6 +179,8 @@ const NavigationBar = () => {
     );
 };
 
+export default NavigationBar;
+
 const styles = StyleSheet.create({
     shadow: {
         shadowColor: '#3EB489',
@@ -243,5 +249,3 @@ const styles = StyleSheet.create({
         backgroundColor: '#10B981',
     }
 });
-
-export default NavigationBar;

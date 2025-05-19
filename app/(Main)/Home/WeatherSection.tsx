@@ -1,10 +1,11 @@
-// app/(Main)/Home/WeatherSection.tsx - Integrated with weatherStack API
+// Cập nhật WeatherSection.tsx để sử dụng modal thay đổi location
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Image, Platform, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, Image, Platform, ActivityIndicator, TouchableOpacity } from 'react-native';
 import { UI } from '@/components/Common/cross-platform/CrossPlatformUtils';
 import { Feather } from '@expo/vector-icons';
 import { fetchWeather } from '@/components/services/weatherService';
 import { StatusBar } from 'react-native';
+import ChangeLocationModal from '@/components/Weather/ChangLocationModal';
 
 // Define weather data interface
 interface WeatherData {
@@ -29,6 +30,8 @@ const WeatherSection = () => {
   const [weather, setWeather] = useState<WeatherData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [currentLocation, setCurrentLocation] = useState('Ho Chi Minh');
+  const [isLocationModalVisible, setIsLocationModalVisible] = useState(false);
 
   // Format time from "2023-05-14 11:24" to "11:24 AM"
   const formatTime = (timeString: string): string => {
@@ -40,22 +43,28 @@ const WeatherSection = () => {
     }
   };
 
-  useEffect(() => {
-    const getWeatherData = async () => {
-      try {
-        setLoading(true);
-        const data = await fetchWeather('Ho Chi Minh');
-        setWeather(data);
-        setError(null);
-      } catch (error) {
-        console.error('Error fetching weather data:', error);
-        setError('Could not load weather data');
-      } finally {
-        setLoading(false);
-      }
-    };
+  const handleLocationChange = (newLocation: string) => {
+    setCurrentLocation(newLocation);
+    setLoading(true);
+    fetchWeatherData(newLocation);
+  };
 
-    getWeatherData();
+  const fetchWeatherData = async (location: string) => {
+    try {
+      setLoading(true);
+      const data = await fetchWeather(location);
+      setWeather(data);
+      setError(null);
+    } catch (error) {
+      console.error('Error fetching weather data:', error);
+      setError('Could not load weather data');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchWeatherData(currentLocation);
   }, []);
 
   // Loading state
@@ -88,10 +97,14 @@ const WeatherSection = () => {
         </View>
 
         <View style={styles.weatherInfoContainer}>
-          <View style={styles.locationRow}>
+          <TouchableOpacity 
+            style={styles.locationRow}
+            onPress={() => setIsLocationModalVisible(true)}
+          >
             <Feather name="map-pin" size={16} color="#FFFFFF" style={styles.locationIcon} />
             <Text style={styles.locationText}>{weather?.location.name || 'Unknown location'}</Text>
-          </View>
+            <Feather name="chevron-down" size={16} color="#FFFFFF" style={{marginLeft: 4}} />
+          </TouchableOpacity>
           <Text style={styles.weatherText}>{weather?.current.weather_descriptions?.[0] || 'Unknown'}</Text>
           <View style={styles.tempRangeContainer}>
             <Feather name="droplet" size={14} color="#FFFFFF" />
@@ -117,6 +130,13 @@ const WeatherSection = () => {
           )}
         </View>
       </View>
+
+      <ChangeLocationModal
+        visible={isLocationModalVisible}
+        onClose={() => setIsLocationModalVisible(false)}
+        onLocationChange={handleLocationChange}
+        currentLocation={currentLocation}
+      />
     </View>
   );
 };

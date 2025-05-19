@@ -12,16 +12,23 @@ interface PlantItemProps {
 const PlantItem: React.FC<PlantItemProps> = ({ name, lastWatered, fertilizeIn, image }) => {
   return (
     <TouchableOpacity style={styles.plantItem}>
-      <Image
-        source={{ uri: image }}
-        style={styles.plantImage}
-      />
+      <View style={styles.imageContainer}>
+        <Image
+          source={{ uri: image }}
+          style={styles.plantImage}
+          resizeMode="cover"
+        />
+      </View>
       <View style={styles.plantInfoContainer}>
-        <Text style={styles.plantName}>{name}</Text>
+        <Text style={styles.plantName} numberOfLines={1} ellipsizeMode="tail">
+          {name}
+        </Text>
         <Text style={styles.plantStatus}>Last watered: {lastWatered}</Text>
         <Text style={styles.plantStatus}>Fertilize in: {fertilizeIn}</Text>
       </View>
-      <Feather name="chevron-right" size={20} color="#4CAF50" />
+      <View style={styles.iconContainer}>
+        <Feather name="chevron-right" size={20} color="#4CAF50" />
+      </View>
     </TouchableOpacity>
   );
 };
@@ -39,25 +46,39 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 2,
     elevation: 2,
+    height: 100, // Fixed height for consistent sizing
+  },
+  imageContainer: {
+    width: 70,
+    height: 70,
+    marginRight: 15,
+    borderRadius: 10,
+    overflow: 'hidden',
   },
   plantImage: {
-    width: 60,
-    height: 60,
-    borderRadius: 10,
-    marginRight: 15,
+    width: '100%',
+    height: '100%',
   },
   plantInfoContainer: {
     flex: 1,
+    justifyContent: 'center',
+    height: '100%',
   },
   plantName: {
     fontSize: 18,
     fontWeight: 'bold',
     color: '#065F46',
-    marginBottom: 3,
+    marginBottom: 5,
   },
   plantStatus: {
     fontSize: 14,
     color: '#047857',
+    marginBottom: 2,
+  },
+  iconContainer: {
+    width: 30,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
 

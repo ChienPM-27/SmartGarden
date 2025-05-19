@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, Image, StyleSheet } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
-import { Story } from './types';
+import { Story } from '../../../components/types/SocialTypes';
 
 const StoryItem: React.FC<{ item: Story }> = ({ item }) => (
   <View style={styles.storyItem}>

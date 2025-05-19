@@ -14,7 +14,7 @@
   import StoryItem from './StoryItem';
   import PostItem from './PostItem';
   import PostModal from '@/components/Social/Post/PostModal';
-  import { Story, Post } from './types';
+  import { Story, Post } from '../../../components/types/SocialTypes';
 
   // Modified to include only the current user's story
   const initialStories: Story[] = [

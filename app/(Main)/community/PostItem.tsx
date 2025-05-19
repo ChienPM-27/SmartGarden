@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, Image, TouchableOpacity, StyleSheet, Animated } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import CommentModal from '@/components/Social/Post/CommentModal';
-import { Post, Comment } from './types';
+import { Post, Comment } from '../../../components/types/SocialTypes';
 
 const PostItem: React.FC<{ 
   item: Post, 

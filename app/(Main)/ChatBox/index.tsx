@@ -19,6 +19,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { getAIResponse } from '@/components/services/geminiService';
 import styles from './chatbox.styles';
+import { StatusBar } from 'expo-status-bar';
 
 interface Message {
     id: string;
@@ -200,11 +201,21 @@ export default function ChatBox() {
         );
     };
 
+    // The StatusBar color that matches the header (green color)
+    const headerBackgroundColor = '#16a34a';
+
     return (
-        <SafeAreaView style={styles.container}>
-            {/* Chat Header */}
+        <SafeAreaView style={[styles.container]}>
+            {/* Consistent StatusBar for both Android and iOS */}
+            <StatusBar 
+                style="light" 
+                backgroundColor={headerBackgroundColor} 
+                translucent={Platform.OS === 'android'} 
+            />
+            
             <View style={styles.header}>
-                <TouchableOpacity onPress={() => router.push('/(Main)/Home')} style={styles.backButton}>
+            {/* Chat Header */}
+                <TouchableOpacity onPress={() => router.push('/(Main)/MyPlants')} style={styles.backButton}>
                     <Ionicons name="arrow-back" size={24} color="#fff" />
                 </TouchableOpacity>
                 <View style={styles.headerContent}>
@@ -314,4 +325,3 @@ export default function ChatBox() {
         </SafeAreaView>
     );
 }
-

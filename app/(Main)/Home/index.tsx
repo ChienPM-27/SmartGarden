@@ -47,12 +47,10 @@ const HomeScreen = () => {
     <SafeAreaView style={{ flex: 1, backgroundColor: '#256dff' }}>  
       <StatusBar style="light"/>
       <View style={styles.container}>
-        {/* Gradient chỉ áp dụng cho phần trên của màn hình */}
         <LinearGradient
           colors={['#256dff', '#75d2f9']}
           style={styles.backgroundGradient}
         />
-
         <Animated.View 
           style={[
             styles.weatherSectionContainer,
@@ -129,7 +127,7 @@ const styles = StyleSheet.create({
     zIndex: 20,
     backgroundColor: 'transparent',
     height: NAVIGATION_HEIGHT,
-  },
+  },  
 });
 
 export default HomeScreen;
