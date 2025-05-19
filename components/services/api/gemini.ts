@@ -1,9 +1,8 @@
-// Cấu hình API key cho Google Gemini AI
-// Thay thế bằng API key của bạn từ Google AI Studio
+
 export const GEMINI_API_KEY = 'AIzaSyDRz9pmdBoj3WZI_mopr5DG0AB1x9bTMbM';
 
-// Tên model - sử dụng model đơn giản hơn để giảm quota
-export const DEFAULT_MODEL = 'gemini-1.0-pro-vision'; // Thay vì gemini-1.5-pro
+
+export const DEFAULT_MODEL = 'gemini-2.0-flash';
 
 // Cấu hình khác
 export const CONFIG = {

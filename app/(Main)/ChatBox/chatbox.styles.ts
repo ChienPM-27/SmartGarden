@@ -50,15 +50,24 @@ const ChatBoxStyles = StyleSheet.create({
         marginBottom: 20,
         marginTop: 10,
     },
-    welcomeImage: {
-        width: 120,
-        height: 120,
-        borderRadius: 60,
-        backgroundColor: '#dcfce7',
+   welcomeImage: {
+    width: 80,
+    height: 80,
+    borderRadius: 60,
+    backgroundColor: '#dcfce7',
+    shadowColor: '#000',
+    shadowOffset: {
+        width: 0,
+        height: 2,
     },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+},
+
     welcomeText: {
         marginTop: 12,
-        fontSize: 16,
+        fontSize: 25,
         color: '#15803d',
         fontWeight: '600',
     },
