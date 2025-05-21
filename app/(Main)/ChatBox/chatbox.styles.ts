@@ -51,21 +51,20 @@ const ChatBoxStyles = StyleSheet.create({
         marginBottom: 20,
         marginTop: 10,
     },
-   welcomeImage: {
-    width: 80,
-    height: 80,
-    borderRadius: 60,
-    backgroundColor: '#dcfce7',
-    shadowColor: '#000',
-    shadowOffset: {
-        width: 0,
-        height: 2,
+    welcomeImage: {
+        width: 80,
+        height: 80,
+        borderRadius: 60,
+        backgroundColor: '#dcfce7',
+        shadowColor: '#000',
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+        elevation: 5,
     },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
-},
-
     welcomeText: {
         marginTop: 12,
         fontSize: 25,
@@ -254,14 +253,16 @@ const ChatBoxStyles = StyleSheet.create({
         borderTopLeftRadius: 30,
         borderTopRightRadius: 30,
         shadowColor: '#000',
-        shadowOffset: { width: 0, height: 3 },
-        shadowOpacity: 0.5,
-        shadowRadius: 7,
-        elevation: 5,
+        shadowOffset: { width: 0, height: -3 },
+        shadowOpacity: 0.2,
+        shadowRadius: 6,
+        elevation: 4,
+        paddingBottom: 40,
+        marginBottom: -40,
     },
     cameraButton: {
         padding: 10,
-        backgroundColor: '#f0fdf4',
+        backgroundColor: '#D1D5DB',
         borderRadius: 20,
         marginRight: 8,
     },
@@ -275,11 +276,11 @@ const ChatBoxStyles = StyleSheet.create({
         paddingVertical: 8,
         maxHeight: 100,
         fontSize: 16,   
-        color: '#fef3c7',
+        color: '#1e293b',
     },
     sendButton: {
         marginLeft: 8,
-        backgroundColor: '#16a34a',
+        backgroundColor: '#2F2F2F',
         borderRadius: 20,
         width: 40,
         height: 40,
@@ -287,24 +288,19 @@ const ChatBoxStyles = StyleSheet.create({
         alignItems: 'center',
     },
     sendButtonDisabled: {
-        backgroundColor: '#a3e635',
+        backgroundColor: '#A9A9A9',
         opacity: 0.7,
     },
     inputFooter: {
         alignItems: 'center',
-        paddingVertical: 2,
-        marginBottom: 15,
+        paddingTop: 5,
+        paddingBottom: 0, // Reduced from 30 to 0
+        marginBottom: 0, // Changed from -40 to 0
         backgroundColor: '#fff',
-        
     },
     safeArea:{
         flex: 1,
-        backgroundColor: 'transparent',
-    },
-    poweredBy: {
-        fontSize: 10,
-        color: '#94a3b8',
-        marginBottom: 4,
+        backgroundColor: '#f0fdf4',
     },
     dayContainer: {
         alignItems: 'center',
@@ -327,8 +323,12 @@ const ChatBoxStyles = StyleSheet.create({
         bottom: 0,
         left: 0,
         right: 0,
-        backgroundColor: 'transparent',
+        backgroundColor: '#fff',
     },
+    keyboardAvoidingView: {
+        width: '100%',
+        backgroundColor: '#fff',
+    }
 });
 
 export default ChatBoxStyles;

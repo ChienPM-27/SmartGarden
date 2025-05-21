@@ -12,8 +12,8 @@ import {
     Image,
     Alert,
     Animated,
-    Dimensions,
     Keyboard,
+    StyleSheet,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -21,6 +21,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { getAIResponse } from '@/components/services/geminiService';
 import styles from './chatbox.styles';
 import { StatusBar } from 'expo-status-bar';
+import { images } from '@/constants/images';
 
 interface Message {
     id: string;
@@ -88,7 +89,7 @@ export default function ChatBox() {
             Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow',
             () => {
                 setKeyboardVisible(true);
-                setTimeout(() => flatListRef.current?.scrollToEnd({ animated: false }), 50);
+                setTimeout(() => flatListRef.current?.scrollToEnd({ animated: true }), 100);
             }
         );
         
@@ -359,136 +360,142 @@ export default function ChatBox() {
     const headerBackgroundColor = '#16a34a';
 
     return (
-        <SafeAreaView style={[styles.container]}>
-            <StatusBar 
-                style="dark" 
-                backgroundColor={headerBackgroundColor} 
-                translucent={Platform.OS === 'android'} 
-            />
-            
-            <View style={styles.header}>
-                <TouchableOpacity 
-                    onPress={() => {
-                        // Dismiss keyboard before navigating back
-                        Keyboard.dismiss();
-                        router.push('/(Main)/MyPlants');
-                    }} 
-                    style={styles.backButton}
-                >
-                    <Ionicons name="arrow-back" size={24} color="#fff" />
-                </TouchableOpacity>
-                <View style={styles.headerContent}>
-                    <Text style={styles.headerTitle}>SmartGarden AI</Text>
-                    <Text style={styles.headerSubtitle}>🌱 Trợ lý thông minh cho cây trồng</Text>
+        <SafeAreaView style={styles.safeArea}>
+            <View style={styles.container}>
+                {/* Background image */}
+                <Image
+                    source={images.chatboxBG}
+                    style={StyleSheet.absoluteFill}
+                    resizeMode="cover"
+                />
+                <StatusBar 
+                    style="dark" 
+                    backgroundColor={headerBackgroundColor} 
+                    translucent={Platform.OS === 'android'} 
+                />
+                
+                <View style={styles.header}>
+                    <TouchableOpacity 
+                        onPress={() => {
+                            // Dismiss keyboard before navigating back
+                            Keyboard.dismiss();
+                            router.push('/(Main)/MyPlants');
+                        }} 
+                        style={styles.backButton}
+                    >
+                        <Ionicons name="arrow-back" size={24} color="#fff" />
+                    </TouchableOpacity>
+                    <View style={styles.headerContent}>
+                        <Text style={styles.headerTitle}>SmartGarden AI</Text>
+                        <Text style={styles.headerSubtitle}>🌱 Trợ lý thông minh cho cây trồng</Text>
+                    </View>
+                    <TouchableOpacity style={styles.menuButton}>
+                        <Ionicons name="menu" size={24} color="#fff" />
+                    </TouchableOpacity>
                 </View>
-                <TouchableOpacity style={styles.menuButton}>
-                    <Ionicons name="menu" size={24} color="#fff" />
-                </TouchableOpacity>
-            </View>
 
-            <FlatList
-                ref={flatListRef}
-                data={messages}
-                renderItem={renderItem}
-                keyExtractor={(item) => item.id}
-                contentContainerStyle={styles.listContent}
-                showsVerticalScrollIndicator={false}
-                initialNumToRender={15}
-                onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: false })}
-                ListHeaderComponent={
-                    <View style={styles.welcomeBanner}>
-                        <Image 
-                            source={require('@/assets/images/logo.png')} 
-                            style={styles.welcomeImage}
-                            defaultSource={require('@/assets/images/logo.png')}
-                        />
-                        <Text style={styles.welcomeText}>
-                            🌿 SmartGarden
-                        </Text>
-                    </View>
-                }
-            />
+                <View style={styles.chatContainer}>
+                    <FlatList
+                        ref={flatListRef}
+                        data={messages}
+                        renderItem={renderItem}
+                        keyExtractor={(item) => item.id}
+                        contentContainerStyle={styles.listContent}
+                        showsVerticalScrollIndicator={false}
+                        initialNumToRender={15}
+                        onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: true })}
+                        ListHeaderComponent={
+                            <View style={styles.welcomeBanner}>
+                                <Image 
+                                    source={require('@/assets/images/logo.png')} 
+                                    style={styles.welcomeImage}
+                                    defaultSource={require('@/assets/images/logo.png')}
+                                />
+                                <Text style={styles.welcomeText}>
+                                    🌿 SmartGarden
+                                </Text>
+                            </View>
+                        }
+                    />
 
-            {loading && (
-                <View style={styles.typingContainer}>
-                    <View style={styles.typingAvatar}>
-                        <Ionicons name="leaf" size={12} color="#fff" />
-                    </View>
-                    <View style={styles.typingBubble}>
-                        <View style={styles.typingDots}>
-                            <View style={[styles.typingDot, styles.typingDot1]} />
-                            <View style={[styles.typingDot, styles.typingDot2]} />
-                            <View style={[styles.typingDot, styles.typingDot3]} />
+                    {loading && (
+                        <View style={styles.typingContainer}>
+                            <View style={styles.typingAvatar}>
+                                <Ionicons name="leaf" size={12} color="#fff" />
+                            </View>
+                            <View style={styles.typingBubble}>
+                                <View style={styles.typingDots}>
+                                    <View style={[styles.typingDot, styles.typingDot1]} />
+                                    <View style={[styles.typingDot, styles.typingDot2]} />
+                                    <View style={[styles.typingDot, styles.typingDot3]} />
+                                </View>
+                            </View>
                         </View>
-                    </View>
-                </View>
-            )}
+                    )}
 
-            {pendingImage && (
-                <Animated.View style={[styles.pendingImageContainer, { opacity: fadeAnim }]}>
-                    <View style={styles.pendingImageWrapper}>
-                        <Image
-                            source={{ uri: pendingImage }}
-                            style={styles.pendingImage}
-                        />
-                        <TouchableOpacity
-                            style={styles.removeImageButton}
-                            onPress={() => {
-                                setPendingImage(null);
-                                fadeAnim.setValue(0);
-                            }}
+                    {pendingImage && (
+                        <Animated.View style={[styles.pendingImageContainer, { opacity: fadeAnim }]}>
+                            <View style={styles.pendingImageWrapper}>
+                                <Image
+                                    source={{ uri: pendingImage }}
+                                    style={styles.pendingImage}
+                                />
+                                <TouchableOpacity
+                                    style={styles.removeImageButton}
+                                    onPress={() => {
+                                        setPendingImage(null);
+                                        fadeAnim.setValue(0);
+                                    }}
+                                >
+                                    <Ionicons name="close-circle" size={22} color="#ef4444" />
+                                </TouchableOpacity>
+                            </View>
+                        </Animated.View>
+                    )}
+                </View>
+
+                <KeyboardAvoidingView
+                    behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+                    keyboardVerticalOffset={Platform.OS === 'ios' ? 60 : 0}
+                    style={styles.keyboardAvoidingView}
+                >
+                    <View style={styles.inputContainer}>
+                        <TouchableOpacity 
+                            style={styles.cameraButton} 
+                            onPress={openCameraOptions}
                         >
-                            <Ionicons name="close-circle" size={22} color="#ef4444" />
+                            <Ionicons name="camera" size={24} color="#2F2F2F" />
+                        </TouchableOpacity>
+                        
+                        <TextInput
+                            ref={inputRef}
+                            style={styles.textInput}
+                            placeholder="Hỏi về cây trồng hoặc phân tích hình ảnh..."
+                            value={input}
+                            onChangeText={setInput}
+                            multiline
+                            maxLength={500}
+                            placeholderTextColor= 'gray'
+                            onFocus={() => {
+                                // Scroll to bottom with animation when focusing input
+                                setTimeout(() => flatListRef.current?.scrollToEnd({ animated: true }), 100);
+                            }}
+                        />
+                        
+                        <TouchableOpacity 
+                            onPress={handleSend} 
+                            style={[styles.sendButton, (!input.trim() && !pendingImage) ? styles.sendButtonDisabled : null]} 
+                            disabled={loading || (!input.trim() && !pendingImage)}
+                        >
+                            {loading ? (
+                                <ActivityIndicator size="small" color="#fff" />
+                            ) : (
+                                <Ionicons name="send" size={18} color="#fff" />
+                            )}
                         </TouchableOpacity>
                     </View>
-                </Animated.View>
-            )}
-
-            <KeyboardAvoidingView
-                behavior={Platform.OS === 'ios' ? 'padding' : 'position'}
-                keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}
-                style={{ width: '100%' }}
-            >
-                <View style={styles.inputContainer}>
-                    <TouchableOpacity 
-                        style={styles.cameraButton} 
-                        onPress={openCameraOptions}
-                    >
-                        <Ionicons name="camera" size={24} color="#22c55e" />
-                    </TouchableOpacity>
-                    
-                    <TextInput
-                        ref={inputRef}
-                        style={styles.textInput}
-                        placeholder="Hỏi về cây trồng hoặc gửi ảnh để phân tích..."
-                        value={input}
-                        onChangeText={setInput}
-                        multiline
-                        maxLength={500}
-                        placeholderTextColor="#6ee7b7"
-                        onFocus={() => {
-                            // Scroll to bottom without animation when focusing input
-                            setTimeout(() => flatListRef.current?.scrollToEnd({ animated: false }), 50);
-                        }}
-                    />
-                    
-                    <TouchableOpacity 
-                        onPress={handleSend} 
-                        style={[styles.sendButton, (!input.trim() && !pendingImage) ? styles.sendButtonDisabled : null]} 
-                        disabled={loading || (!input.trim() && !pendingImage)}
-                    >
-                        {loading ? (
-                            <ActivityIndicator size="small" color="#fff" />
-                        ) : (
-                            <Ionicons name="send" size={18} color="#fff" />
-                        )}
-                    </TouchableOpacity>
-                </View>
-                
-                <View style={styles.inputFooter}>
-                    <Text style={styles.poweredBy}>🤖 Powered by Gemini AI</Text>
-                </View>
-            </KeyboardAvoidingView>
+                </KeyboardAvoidingView>
+            </View>
         </SafeAreaView>
     );
 }

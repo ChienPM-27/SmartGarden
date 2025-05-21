@@ -1,13 +1,62 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import React, { useState, useRef } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Animated, Alert } from 'react-native';
 import { Feather, MaterialCommunityIcons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 import AddPlantModal from '@/app/(Main)/MyPlants/Modal/AddPlantModal';
 import { Plant } from '@/components/types/PlantTypes';
 import StorageService from '@/components/services/storage/storageService';
-import { Alert } from 'react-native';
+
+type QuickActionButtonProps = {
+  iconComponent: React.ReactNode;
+  label: string;
+  containerStyle?: object;
+  onPress: () => void;
+};
+
+const QuickActionButton: React.FC<QuickActionButtonProps> = ({ iconComponent, label, containerStyle, onPress }) => {
+  const animatedValue = useState(new Animated.Value(1))[0];
+
+  const handlePressIn = () => {
+    Animated.spring(animatedValue, {
+      toValue: 0.9,
+      useNativeDriver: true,
+    }).start();
+  };
+
+  const handlePressOut = () => {
+    Animated.spring(animatedValue, {
+      toValue: 1,
+      friction: 3,
+      tension: 40,
+      useNativeDriver: true,
+    }).start();
+  };
+
+  return (
+    <TouchableOpacity 
+      style={styles.quickActionButton}
+      onPress={onPress}
+      onPressIn={handlePressIn}
+      onPressOut={handlePressOut}
+      activeOpacity={0.7}
+    >
+      <Animated.View 
+        style={[
+          styles.iconContainer, 
+          containerStyle,
+          { transform: [{ scale: animatedValue }] }
+        ]}
+      >
+        {iconComponent}
+      </Animated.View>
+      <Text style={styles.quickActionText}>{label}</Text>
+    </TouchableOpacity>
+  );
+};
 
 const QuickActions = () => {
   const [modalVisible, setModalVisible] = useState(false);
+  const router = useRouter(); // Using Expo Router for navigation
 
   const handleAddPlant = async (newPlantData: Omit<Plant, 'id'>) => {
     try {
@@ -28,35 +77,49 @@ const QuickActions = () => {
     }
   };
 
+  // Function to navigate to Scanner screen
+  const navigateToScanner = () => {
+    try {
+      // Navigate to the Scanner component
+      router.push('./Home/Scanner');
+    } catch (error) {
+      console.error('Error navigating to scanner:', error);
+      Alert.alert('Error', 'Unable to open scanner');
+    }
+  };
+
   return (
     <View style={styles.quickActionsContainer}>
       <Text style={styles.sectionTitle}>Quick Actions</Text>
       
       <View style={styles.quickActionButtonsRow}>
-        {/* Water Button */}
-        <TouchableOpacity style={styles.quickActionButton}>
-          <View style={[styles.iconContainer, styles.waterIconContainer]}>
-            <Feather name="droplet" size={24} color="white" />
-          </View>
-          <Text style={styles.quickActionText}>Water</Text>
-        </TouchableOpacity>
+        {/* News Button */}
+        <QuickActionButton 
+          iconComponent={<Feather name="book" size={24} color="white" />}
+          label="News"
+          containerStyle={styles.newsIconContainer}
+          onPress={() => console.log('News pressed')}
+        />
 
         {/* Add Plants Button */}
-        <TouchableOpacity style={styles.quickActionButton} onPress={() => setModalVisible(true)}>
-          <View style={[styles.iconContainer, styles.addPlantsIconContainer]}>
-            <Feather name="plus" size={24} color="white" />
-          </View>
-          <Text style={styles.quickActionText}>Add plants</Text>
-        </TouchableOpacity>
+        <QuickActionButton 
+          iconComponent={<Feather name="plus" size={24} color="white" />}
+          label="Add plants"
+          containerStyle={styles.addPlantsIconContainer}
+          onPress={() => setModalVisible(true)}
+        />
 
-        {/* Fertilize Button */}
-        <TouchableOpacity style={styles.quickActionButton}>
-          <View style={[styles.iconContainer, styles.fertilizeIconContainer]}>
-            <MaterialCommunityIcons name="tree" size={24} color="white" />
-          </View>
-          <Text style={styles.quickActionText}>Fertilize</Text>
-        </TouchableOpacity>
+        {/* QR Scan Button */}
+        <QuickActionButton 
+          iconComponent={<MaterialCommunityIcons name="qrcode-scan" size={24} color="white" />}
+          label="QR Scan"
+          containerStyle={styles.qrScanIconContainer}
+          onPress={navigateToScanner} // Use the navigation function here
+        />
       </View>
+      
+      {/* Content to fill remaining space */}
+      <View style={styles.extendedSpaceContainer} />
 
       <AddPlantModal
         visible={modalVisible}
@@ -69,10 +132,10 @@ const QuickActions = () => {
 
 const styles = StyleSheet.create({
   quickActionsContainer: {
-    paddingTop: 0,
+    flex: 1,
     paddingHorizontal: 20,
     marginTop: 10,
-    
+    paddingBottom: 20,
   },
   sectionTitle: {
     fontSize: 24,
@@ -98,19 +161,23 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 5,
   },
-  waterIconContainer: {
+  newsIconContainer: {
     backgroundColor: '#7DD3FC',
   },
   addPlantsIconContainer: {
     backgroundColor: '#4ADE80',
   },
-  fertilizeIconContainer: {
+  qrScanIconContainer: {
     backgroundColor: '#12866A',
   },
   quickActionText: {
     fontSize: 16,
     color: '#065F46',
     fontWeight: '500',
+  },
+  extendedSpaceContainer: {
+    flex: 1,
+    backgroundColor: 'transparent',
   },
 });
 

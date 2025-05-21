@@ -83,7 +83,13 @@ const HomeScreen = () => {
         </Animated.ScrollView>
       </View>
 
-      <View style={styles.navigationContainer}>
+      <View style={{
+        position: 'absolute',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        zIndex: 20
+      }}>
         <NavigationBar />
       </View>
     </SafeAreaView>
@@ -119,15 +125,6 @@ const styles = StyleSheet.create({
     paddingTop: 16,
     paddingBottom: 70,
   },
-  navigationContainer: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,  
-    right: 0,
-    zIndex: 20,
-    backgroundColor: 'transparent',
-    height: NAVIGATION_HEIGHT,
-  },  
 });
 
 export default HomeScreen;

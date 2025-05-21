@@ -25,8 +25,22 @@
       "permissions": [
         "CAMERA",
         "READ_EXTERNAL_STORAGE",
-        "WRITE_EXTERNAL_STORAGE"
-      ]
+        "WRITE_EXTERNAL_STORAGE",
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.ACCESS_MEDIA_LOCATION",
+        "CAMERA",
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE",
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.ACCESS_MEDIA_LOCATION"
+      ],
+      "package": "com.chienpm.SmartGarden"
     },
     "web": {
       "bundler": "metro",
@@ -37,7 +51,8 @@
       [
         "expo-camera",
         {
-          "cameraPermission": "Cho phép SmartGarden truy cập vào máy ảnh để chụp ảnh cây trồng."
+          "cameraPermission": "Cho phép SmartGarden truy cập vào máy ảnh để chụp ảnh cây trồng.",
+          "microphonePermission": "Cho phép SmartGarden truy cập vào microphone để ghi âm."
         }
       ],
       [

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
     Alert,
     Animated,
@@ -6,11 +6,13 @@ import {
     TouchableOpacity,
     View,
     Dimensions,
+    Easing,
 } from 'react-native';
 import { CurvedBottomBarExpo } from 'react-native-curved-bottom-bar';
 import { MaterialIcons } from '@expo/vector-icons';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { MaterialCommunityIcons, Feather } from '@expo/vector-icons';
 import { Ionicons } from '@expo/vector-icons';
+import { Entypo } from '@expo/vector-icons';
 import { useRouter, usePathname } from 'expo-router';
 import { Camera } from 'expo-camera';
 import * as ImagePicker from 'expo-image-picker';
@@ -22,6 +24,15 @@ const NavigationBar = () => {
     const pathname = usePathname();
     const [activeTab, setActiveTab] = useState('home');
     const [hasCameraPermission, setHasCameraPermission] = useState<boolean | null>(null);
+    
+    // Animation values for each tab
+    const homeAnimation = useRef(new Animated.Value(activeTab === 'home' ? 1 : 0)).current;
+    const myPlantsAnimation = useRef(new Animated.Value(activeTab === 'my-plants' ? 1 : 0)).current;
+    const chatBoxAnimation = useRef(new Animated.Value(activeTab === 'chat-box' ? 1 : 0)).current;
+    const settingAnimation = useRef(new Animated.Value(activeTab === 'setting' ? 1 : 0)).current;
+    
+    // Animation value for the camera button
+    const cameraButtonAnimation = useRef(new Animated.Value(1)).current;
 
     useEffect(() => {
         if (pathname.includes('/Home')) {
@@ -36,13 +47,62 @@ const NavigationBar = () => {
     }, [pathname]);
 
     useEffect(() => {
+        // Animate the active tab
+        Animated.parallel([
+            Animated.timing(homeAnimation, {
+                toValue: activeTab === 'home' ? 1 : 0,
+                duration: 300,
+                useNativeDriver: true,
+                easing: Easing.bezier(0.2, 0.8, 0.2, 1),
+            }),
+            Animated.timing(myPlantsAnimation, {
+                toValue: activeTab === 'my-plants' ? 1 : 0,
+                duration: 300,
+                useNativeDriver: true,
+                easing: Easing.bezier(0.2, 0.8, 0.2, 1),
+            }),
+            Animated.timing(chatBoxAnimation, {
+                toValue: activeTab === 'chat-box' ? 1 : 0,
+                duration: 300,
+                useNativeDriver: true,
+                easing: Easing.bezier(0.2, 0.8, 0.2, 1),
+            }),
+            Animated.timing(settingAnimation, {
+                toValue: activeTab === 'setting' ? 1 : 0,
+                duration: 300,
+                useNativeDriver: true,
+                easing: Easing.bezier(0.2, 0.8, 0.2, 1),
+            }),
+        ]).start();
+    }, [activeTab]);
+
+    useEffect(() => {
         (async () => {
             const { status } = await Camera.requestCameraPermissionsAsync();
             setHasCameraPermission(status === 'granted');
         })();
     }, []);
 
+    const animateCameraButton = () => {
+        Animated.sequence([
+            Animated.timing(cameraButtonAnimation, {
+                toValue: 0.8,
+                duration: 100,
+                useNativeDriver: true,
+                easing: Easing.bezier(0.2, 0.8, 0.2, 1),
+            }),
+            Animated.timing(cameraButtonAnimation, {
+                toValue: 1,
+                duration: 200,
+                useNativeDriver: true,
+                easing: Easing.bezier(0.2, 0.8, 0.2, 1),
+            }),
+        ]).start();
+    };
+
     const handleCameraAccess = async () => {
+        animateCameraButton();
+        
         if (!hasCameraPermission) {
             Alert.alert('Permission needed', 'Camera permission is required to use this feature');
             return;
@@ -66,8 +126,23 @@ const NavigationBar = () => {
         }
     };
 
+    const getAnimationForTab = (tabName: string) => {
+        switch (tabName) {
+            case 'home':
+                return homeAnimation;
+            case 'my-plants':
+                return myPlantsAnimation;
+            case 'chat-box':
+                return chatBoxAnimation;
+            case 'setting':
+                return settingAnimation;
+            default:
+                return homeAnimation;
+        }
+    };
+
     const _renderIcon = (routeName: string) => {
-        let icon: string = 'home';
+        let icon = 'home';
         let IconComponent: any = MaterialIcons;
 
         switch (routeName) {
@@ -76,51 +151,85 @@ const NavigationBar = () => {
                 IconComponent = MaterialIcons;
                 break;
             case 'my-plants':
-                icon = 'list';
-                IconComponent = MaterialIcons;
+                icon = 'leaf'; 
+                IconComponent = Entypo;
                 break;
             case 'chat-box':
                 icon = 'robot-excited-outline';
                 IconComponent = MaterialCommunityIcons;
                 break;
             case 'setting':
-                icon = 'people';
-                IconComponent = Ionicons;
+                icon = 'users';
+                IconComponent = Feather;
                 break;
         }
 
         const isActive = routeName === activeTab;
+        const iconSize = (IconComponent === Feather || IconComponent === Entypo) ? 22 : 25;
+        const animation = getAnimationForTab(routeName);
+
+        // Animation styles
+        const iconScale = animation.interpolate({
+            inputRange: [0, 1],
+            outputRange: [1, 1.2],
+        });
+
+        const iconColor = animation.interpolate({
+            inputRange: [0, 1],
+            outputRange: ['#808080', '#10B981'],
+        });
 
         return (
             <View style={styles.iconContainer}>
-                <IconComponent
-                    name={icon}
-                    size={25}
-                    color={isActive ? '#10B981' : '#808080'}
-                />
-                {isActive && <View style={styles.activeIndicator} />}
+                <Animated.View style={{ 
+                    transform: [{ scale: iconScale }],
+                }}>
+                    <IconComponent
+                        name={icon}
+                        size={iconSize}
+                        color={isActive ? '#10B981' : '#808080'}
+                    />
+                </Animated.View>
+                {isActive && (
+                    <Animated.View 
+                        style={[
+                            styles.activeIndicator,
+                            {
+                                opacity: animation,
+                                transform: [
+                                    { scaleX: animation.interpolate({
+                                        inputRange: [0, 1],
+                                        outputRange: [0, 1],
+                                    })},
+                                ],
+                            },
+                        ]} 
+                    />
+                )}
             </View>
         );
     };
 
-    const renderTabBar = ({ routeName, navigate }: any) => {
+    const renderTabBar = ({ routeName, navigate }: { routeName: string; navigate: (name: string) => void }) => {
         return (
             <TouchableOpacity
                 onPress={() => {
-                    setActiveTab(routeName);
-                    switch (routeName) {
-                        case 'home':
-                            router.push('/(Main)/Home');
-                            break;
-                        case 'my-plants':
-                            router.push('/(Main)/MyPlants');
-                            break;
-                        case 'chat-box':
-                            router.push('/(Main)/ChatBox');
-                            break;
-                        case 'setting':
-                            router.push('/(Main)/community');
-                            break;
+                    if (routeName !== activeTab) {
+                        setActiveTab(routeName);
+                        switch (routeName) {
+                            case 'home':
+                                router.push('/(Main)/Home');
+                                break;
+                            case 'my-plants':
+                                router.push('/(Main)/MyPlants');
+                                break;
+                            case 'chat-box':
+                                router.push('/(Main)/ChatBox');
+                                break;
+                            case 'setting':
+                                router.push('/(Main)/community');
+                                break;
+                        }
                     }
                 }}
                 style={styles.tabbarItem}
@@ -136,16 +245,24 @@ const NavigationBar = () => {
                 type="DOWN"
                 style={styles.bottomBar}
                 shadowStyle={styles.shadow}
-                height={55}
-                circleWidth={55}
+                height={58}
+                circleWidth={58}
                 bgColor="white"
                 initialRouteName="home"
                 borderTopLeftRight
-                renderCircle={({ selectedTab, navigate }) => (
-                    <Animated.View style={styles.btnCircleUp}>
+                renderCircle={({ selectedTab, navigate }: { selectedTab: string; navigate: (name: string) => void }) => (
+                    <Animated.View 
+                        style={[
+                            styles.btnCircleUp,
+                            {
+                                transform: [{ scale: cameraButtonAnimation }]
+                            }
+                        ]}
+                    >
                         <TouchableOpacity
                             style={styles.button}
                             onPress={handleCameraAccess}
+                            activeOpacity={0.8}
                         >
                             <MaterialIcons name="camera-alt" color="gray" size={30} />
                         </TouchableOpacity>
@@ -194,6 +311,7 @@ const styles = StyleSheet.create({
     button: {
         flex: 1,
         justifyContent: 'center',
+        alignItems: 'center',
     },
     bottomBar: {
         position: 'absolute',
