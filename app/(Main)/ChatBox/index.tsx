@@ -13,6 +13,7 @@ import {
     Alert,
     Animated,
     Dimensions,
+    Keyboard,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -58,6 +59,7 @@ export default function ChatBox() {
     const [input, setInput] = useState('');
     const [loading, setLoading] = useState(false);
     const [pendingImage, setPendingImage] = useState<string | null>(null);
+    const [keyboardVisible, setKeyboardVisible] = useState(false);
     const flatListRef = useRef<FlatList<Message>>(null);
     const inputRef = useRef<TextInput>(null);
     const { imageUri } = useLocalSearchParams();
@@ -78,6 +80,29 @@ export default function ChatBox() {
                 );
             }
         })();
+    }, []);
+
+    // Keyboard listeners for immediate reactions
+    useEffect(() => {
+        const keyboardWillShowListener = Keyboard.addListener(
+            Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow',
+            () => {
+                setKeyboardVisible(true);
+                setTimeout(() => flatListRef.current?.scrollToEnd({ animated: false }), 50);
+            }
+        );
+        
+        const keyboardWillHideListener = Keyboard.addListener(
+            Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide',
+            () => {
+                setKeyboardVisible(false);
+            }
+        );
+        
+        return () => {
+            keyboardWillShowListener.remove();
+            keyboardWillHideListener.remove();
+        };
     }, []);
 
     // Initial welcome message
@@ -110,6 +135,9 @@ export default function ChatBox() {
 
     const handleSend = async () => {
         if (!input.trim() && !pendingImage) return;
+        
+        // Immediately dismiss keyboard when sending message
+        Keyboard.dismiss();
 
         const userMessage: Message = {
             id: Date.now().toString(),
@@ -125,6 +153,11 @@ export default function ChatBox() {
         setPendingImage(null);
         setLoading(true);
         fadeAnim.setValue(0);
+
+        // Scroll to bottom without animation for immediate feedback
+        setTimeout(() => {
+            flatListRef.current?.scrollToEnd({ animated: false });
+        }, 50);
 
         try {
             const aiReply = await getAIResponse(input, tempImageUri || undefined);
@@ -149,9 +182,10 @@ export default function ChatBox() {
             setMessages((prev) => [...prev, errorMessage]);
         } finally {
             setLoading(false);
+            // Use setTimeout with a short delay and no animation for immediate scroll
             setTimeout(() => {
-                flatListRef.current?.scrollToEnd({ animated: true });
-            }, 300);
+                flatListRef.current?.scrollToEnd({ animated: false });
+            }, 50);
         }
     };
 
@@ -200,6 +234,9 @@ export default function ChatBox() {
     };
 
     const openCameraOptions = () => {
+        // Dismiss keyboard if visible when opening camera options
+        Keyboard.dismiss();
+        
         Alert.alert(
             '📸 Chụp ảnh cây trồng',
             'Chọn nguồn ảnh để tôi có thể giúp bạn phân tích cây trồng',
@@ -330,7 +367,14 @@ export default function ChatBox() {
             />
             
             <View style={styles.header}>
-                <TouchableOpacity onPress={() => router.push('/(Main)/MyPlants')} style={styles.backButton}>
+                <TouchableOpacity 
+                    onPress={() => {
+                        // Dismiss keyboard before navigating back
+                        Keyboard.dismiss();
+                        router.push('/(Main)/MyPlants');
+                    }} 
+                    style={styles.backButton}
+                >
                     <Ionicons name="arrow-back" size={24} color="#fff" />
                 </TouchableOpacity>
                 <View style={styles.headerContent}>
@@ -350,7 +394,7 @@ export default function ChatBox() {
                 contentContainerStyle={styles.listContent}
                 showsVerticalScrollIndicator={false}
                 initialNumToRender={15}
-                onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: true })}
+                onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: false })}
                 ListHeaderComponent={
                     <View style={styles.welcomeBanner}>
                         <Image 
@@ -401,11 +445,15 @@ export default function ChatBox() {
             )}
 
             <KeyboardAvoidingView
-                behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-                keyboardVerticalOffset={90}
+                behavior={Platform.OS === 'ios' ? 'padding' : 'position'}
+                keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}
+                style={{ width: '100%' }}
             >
                 <View style={styles.inputContainer}>
-                    <TouchableOpacity style={styles.cameraButton} onPress={openCameraOptions}>
+                    <TouchableOpacity 
+                        style={styles.cameraButton} 
+                        onPress={openCameraOptions}
+                    >
                         <Ionicons name="camera" size={24} color="#22c55e" />
                     </TouchableOpacity>
                     
@@ -418,7 +466,10 @@ export default function ChatBox() {
                         multiline
                         maxLength={500}
                         placeholderTextColor="#6ee7b7"
-                        onFocus={() => setTimeout(() => flatListRef.current?.scrollToEnd({ animated: true }), 100)}
+                        onFocus={() => {
+                            // Scroll to bottom without animation when focusing input
+                            setTimeout(() => flatListRef.current?.scrollToEnd({ animated: false }), 50);
+                        }}
                     />
                     
                     <TouchableOpacity 
