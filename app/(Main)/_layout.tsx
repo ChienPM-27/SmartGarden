@@ -39,6 +39,14 @@ const _Layout = () => {
                     tabBarButton: () => null,
                 }}
             />
+            <Tabs.Screen
+                name="News/index"
+                options={{
+                    title: 'News',
+                    headerShown: false,
+                    tabBarButton: () => null,
+                }}
+            />
         </Tabs>
     );
 };

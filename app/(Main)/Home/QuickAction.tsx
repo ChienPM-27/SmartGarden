@@ -81,12 +81,22 @@ const QuickActions = () => {
   const navigateToScanner = () => {
     try {
       // Navigate to the Scanner component
-      router.push('./Home/Scanner');
+      router.push('/Home/Scanner');
     } catch (error) {
       console.error('Error navigating to scanner:', error);
       Alert.alert('Error', 'Unable to open scanner');
     }
   };
+  
+  const navigateToNews = () => {
+    try {
+      // Navigate to the News component
+      router.push('./News');
+    } catch (error) {
+      console.error('Error navigating to news:', error);
+      Alert.alert('Error', 'Unable to open news');
+    }
+  }
 
   return (
     <View style={styles.quickActionsContainer}>
@@ -98,7 +108,7 @@ const QuickActions = () => {
           iconComponent={<Feather name="book" size={24} color="white" />}
           label="News"
           containerStyle={styles.newsIconContainer}
-          onPress={() => console.log('News pressed')}
+          onPress={navigateToNews}
         />
 
         {/* Add Plants Button */}
@@ -114,7 +124,7 @@ const QuickActions = () => {
           iconComponent={<MaterialCommunityIcons name="qrcode-scan" size={24} color="white" />}
           label="QR Scan"
           containerStyle={styles.qrScanIconContainer}
-          onPress={navigateToScanner} // Use the navigation function here
+          onPress={navigateToScanner}
         />
       </View>
       

@@ -20,7 +20,6 @@ const HomeScreen = () => {
   const { height: screenHeight } = Dimensions.get('window');
 
   useEffect(() => {
-    // Chiều cao còn lại = chiều cao màn hình - phần trên (WEATHER_SECTION_HEIGHT + 60) - thanh điều hướng - padding
     const remainingHeight = screenHeight - (WEATHER_SECTION_HEIGHT + 60) - NAVIGATION_HEIGHT;
     setMintContainerHeight(remainingHeight);
   }, [screenHeight]);
@@ -67,7 +66,7 @@ const HomeScreen = () => {
         <Animated.ScrollView 
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
-          bounces={false} // Tắt bounce để tránh thấy nền
+          bounces={false}
           overScrollMode="never"
           scrollEventThrottle={16}
           onScroll={handleScroll}

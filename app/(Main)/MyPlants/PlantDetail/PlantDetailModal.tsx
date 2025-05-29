@@ -15,6 +15,7 @@ import { Plant } from '@/components/types/PlantTypes';
 import ImagePickerService from '@/components/services/utils/imagePickerService';
 import EditPlantModal from '../Modal/EditPLantModal';
 import StorageService from '@/components/services/storage/storageService';
+import { getAIResponse } from '@/components/services/geminiService';
 
 interface PlantDetailModalProps {
     selectedPlant: Plant | null;
@@ -38,12 +39,15 @@ const PlantDetailModal: React.FC<PlantDetailModalProps> = ({
     const [currentPlantId, setCurrentPlantId] = useState<string | null>(null);
     const [editModalVisible, setEditModalVisible] = useState(false);
     const [localPlant, setLocalPlant] = useState<Plant | null>(null);
+    const [aiDescription, setAiDescription] = useState<string>('');
+    const [isLoadingAI, setIsLoadingAI] = useState(false);
 
     // Reset photoUri when modal closes
     const handleClose = () => {
         setPhotoUri(null);
         setCurrentPlantId(null);
         setLocalPlant(null);
+        setAiDescription('');
         handleClosePlantDetail();
     };
 
@@ -53,8 +57,31 @@ const PlantDetailModal: React.FC<PlantDetailModalProps> = ({
             setPhotoUri(selectedPlant.photoUri || selectedPlant.imageUri || null);
             setCurrentPlantId(selectedPlant.id);
             setLocalPlant({...selectedPlant});
+            
+            // Get AI description when plant is selected
+            fetchAIDescription(selectedPlant);
         }
     }, [selectedPlant, currentPlantId]);
+
+    const fetchAIDescription = async (plant: Plant) => {
+        try {
+            setIsLoadingAI(true);
+            const imageSource = plant.photoUri || plant.imageUri;
+            const prompt = `Hãy mô tả ngắn gọn về cây ${plant.name} (tên khoa học: ${plant.scientificName || 'không rõ'}). Đặc điểm chính: ${plant.type || 'không rõ loại'}, cần được tưới ${plant.waterStatus || 'theo định kỳ'}, nhiệt độ phù hợp ${plant.temperature || 'vừa phải'}. Cho tôi 2-3 câu mô tả về đặc điểm và cách chăm sóc.`;
+            
+            // Get AI response with or without image
+            const response = await getAIResponse(prompt, imageSource || undefined);
+            
+            // Clean up AI response
+            let cleanResponse = response.replace('🌱 SmartBot:', '').trim();
+            setAiDescription(cleanResponse);
+        } catch (error) {
+            console.error('Error getting AI description:', error);
+            setAiDescription('Không thể tải mô tả AI cho cây này. Vui lòng thử lại sau.');
+        } finally {
+            setIsLoadingAI(false);
+        }
+    };
 
     const handleChangeImage = async () => {
         try {
@@ -70,6 +97,9 @@ const PlantDetailModal: React.FC<PlantDetailModalProps> = ({
                 
                 // Then update parent component state
                 updatePlantPhoto(newUri);
+                
+                // Get new AI description with new image
+                fetchAIDescription(updatedPlant);
             }
         } catch (error) {
             console.log('Error while picking image: ', error);
@@ -81,9 +111,10 @@ const PlantDetailModal: React.FC<PlantDetailModalProps> = ({
 
     const handleOpenEditModal = () => {
         if (localPlant) {
-            setEditModalVisible(true);
+            openEditModal();
         }
     };
+
 
     const handleCloseEditModal = () => {
         setEditModalVisible(false);
@@ -94,17 +125,19 @@ const PlantDetailModal: React.FC<PlantDetailModalProps> = ({
             setLocalPlant(updatedPlant);
             handleSavePlant(updatedPlant);
 
-            // Nếu ảnh thay đổi, cập nhật lại
+            // Update photo if changed
             setPhotoUri(updatedPlant.photoUri ?? null);
+            
+            // Get updated AI description
+            fetchAIDescription(updatedPlant);
 
             setEditModalVisible(false);
             Alert.alert('Thành công', 'Thông tin cây đã được cập nhật');
         } catch (error) {
             console.error('Lỗi khi lưu thông tin cây:', error);
             Alert.alert('Lỗi', 'Không thể cập nhật thông tin cây. Vui lòng thử lại.');
-            }
-        };
-
+        }
+    };
 
     const confirmDeletePlant = () => {
         Alert.alert(
@@ -158,6 +191,25 @@ const PlantDetailModal: React.FC<PlantDetailModalProps> = ({
                                     />
                                 ) : (
                                     <MaterialIcons name={localPlant.icon} size={64} color="#10B981" />
+                                )}
+                            </View>
+
+                            {/* AI Description Section */}
+                            <View style={styles.aiDescriptionContainer}>
+                                <View style={styles.aiHeaderRow}>
+                                    <MaterialIcons name="auto-awesome" size={18} color="#10B981" />
+                                    <Text style={styles.aiDescriptionTitle}>Mô tả thông minh</Text>
+                                </View>
+
+                                {isLoadingAI ? (
+                                    <View style={styles.aiLoadingContainer}>
+                                        <ActivityIndicator size="small" color="#10B981" />
+                                        <Text style={styles.aiLoadingText}>Đang tạo mô tả...</Text>
+                                    </View>
+                                ) : (
+                                    <Text style={styles.aiDescriptionText}>
+                                        {aiDescription || "Chưa có mô tả AI cho cây này."}
+                                    </Text>
                                 )}
                             </View>
 
@@ -276,6 +328,42 @@ const styles = StyleSheet.create({
         width: '100%',
         height: 200,
         borderRadius: 12,
+    },
+    // AI Description styles
+    aiDescriptionContainer: {
+        width: '100%',
+        backgroundColor: '#F0FDF4',
+        borderRadius: 12,
+        padding: 14,
+        marginVertical: 10,
+        borderWidth: 1,
+        borderColor: '#D1FAE5',
+    },
+    aiHeaderRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 8,
+    },
+    aiDescriptionTitle: {
+        fontSize: 15,
+        fontWeight: '600',
+        color: '#065F46',
+        marginLeft: 6,
+    },
+    aiDescriptionText: {
+        color: '#333333',
+        lineHeight: 20,
+        fontSize: 14,
+    },
+    aiLoadingContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: 10,
+    },
+    aiLoadingText: {
+        color: '#666666',
+        marginLeft: 8,
     },
     infoRow: {
         flexDirection: 'row',
