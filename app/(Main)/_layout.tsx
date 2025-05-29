@@ -39,6 +39,22 @@ const _Layout = () => {
                     tabBarButton: () => null,
                 }}
             />
+            <Tabs.Screen
+                name="Market/index"
+                options={{
+                    title: 'market',
+                    headerShown: false,
+                    tabBarButton: () => null,
+                }}
+            />
+            <Tabs.Screen
+                name="Market/product/[id]"
+                options={{
+                    title: 'Product Detail',
+                    headerShown: false,
+                    tabBarButton: () => null,
+                }}
+            />
         </Tabs>
     );
 };

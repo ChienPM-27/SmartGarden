@@ -6,6 +6,7 @@ import chatBG from "@/assets/images/chatBG.png";
 import HomeBG from "@/assets/images/HomeBG.png";
 import chatboxBG from "@/assets/images/chatboxBG.png";
 
+
 export const images = {
   bg,
   highlight,
