@@ -17,6 +17,7 @@ import { useRouter, useFocusEffect } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
 import { images } from '@/constants/images';
 import { Easing } from 'react-native';
+import apiService from '@/components/services/api/apiServices';
 
 export default function CreateAccountScreen() {
     const router = useRouter();
@@ -56,24 +57,33 @@ export default function CreateAccountScreen() {
         }).start();
     };
 
-    const handleCreateAccount = () => {
-        if (!username || !email || !password) {
-            Alert.alert('Incomplete', 'Please fill in all fields');
+    const handleCreateAccount = async () => {
+        if (!username || !password) {
+            Alert.alert('Incomplete', 'Please fill in all required fields');
             return;
         }
         setIsCreating(true);
-        setTimeout(() => {
-            setUsername('');
-            setEmail('');
-            setPassword('');
+        try {
+            const result = await apiService.register(username, password);
+            if (result.success) {
+                setUsername('');
+                setEmail('');
+                setPassword('');
+                setIsCreating(false);
+                Alert.alert(
+                    'Success',
+                    'Your account has been created and you are now logged in!',
+                    [{ text: 'OK', onPress: () => router.replace('/(Main)/Home') }],
+                    { cancelable: false }
+                );
+            } else {
+                setIsCreating(false);
+                Alert.alert('Registration Failed', result.message || 'Please try again.');
+            }
+        } catch (error) {
             setIsCreating(false);
-            Alert.alert(
-                "Success",
-                "Your account has been created successfully!",
-                [{ text: "OK", onPress: () => router.back() }],
-                { cancelable: false }
-            );
-        }, 1500);
+            Alert.alert('Error', 'An error occurred. Please try again.');
+        }
     };
 
     return (

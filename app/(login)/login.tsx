@@ -14,10 +14,11 @@ import {
 import { MaterialIcons } from '@expo/vector-icons';
 import { images } from '@/constants/images';
 import { useRouter } from 'expo-router';
+import apiService from '@/components/services/api/apiServices'; // Import API service
 
 export default function LoginScreen() {
     const router = useRouter();
-    const [username, setUsername] = useState('');
+    const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
     const [showPassword, setShowPassword] = useState(false);
@@ -33,7 +34,17 @@ export default function LoginScreen() {
             duration: 600,
             useNativeDriver: true,
         }).start();
+
+        // Check if user is already logged in
+        checkAuthStatus();
     }, []);
+
+    const checkAuthStatus = async () => {
+        const isAuth = await apiService.isAuthenticated();
+        if (isAuth) {
+            router.replace('/(Main)/Home');
+        }
+    };
 
     const handlePressIn = (scaleAnim: Animated.Value) => {
         Animated.spring(scaleAnim, {
@@ -41,6 +52,7 @@ export default function LoginScreen() {
             useNativeDriver: true,
         }).start();
     };
+
     const handlePressOut = (scaleAnim: Animated.Value) => {
         Animated.spring(scaleAnim, {
             toValue: 1,
@@ -50,32 +62,69 @@ export default function LoginScreen() {
     };
 
     const handleNavigateCreateAccount = () => {
-        setUsername('');
+        setEmail('');
         setPassword('');
         setErrorMessage('');
         router.push('/create-account');
     };
 
     const handleNavigateForgotPassword = () => {
-        setUsername('');
+        setEmail('');
         setPassword('');
         setErrorMessage('');
         router.push('/forgot-password');
     };
 
-    const handleNavigateLogin = () => {
-        if (!username || !password) {
+    const validateInputs = () => {
+        if (!email || !password) {
             setErrorMessage('Please enter both username and password.');
+            return false;
+        }
+
+        if (password.length < 6) {
+            setErrorMessage('Password must be at least 6 characters.');
+            return false;
+        }
+
+        return true;
+    };
+
+    const handleNavigateLogin = async () => {
+        if (!validateInputs()) {
             return;
         }
+
         setErrorMessage('');
         setIsLoggingIn(true);
 
-        // Simulate login delay
-        setTimeout(() => {
+        try {
+            console.log('Attempting login for:', email);
+            
+            const result = await apiService.login(email, password);
+
+            if (result.success) {
+                // Save tokens
+                const { accessToken, tokenType } = result.data;
+                await apiService.saveTokens(accessToken, tokenType);
+                
+                console.log('Login successful, navigating to home...');
+                
+                // Clear form
+                setEmail('');
+                setPassword('');
+                
+                // Navigate to main screen
+                router.replace('/(Main)/Home');
+            } else {
+                console.error('Login failed:', result.message);
+                setErrorMessage(result.message || 'Login failed. Please check your credentials.');
+            }
+        } catch (error) {
+            console.error('Login Error:', error);
+            setErrorMessage('An error occurred. Please check your network connection and try again.');
+        } finally {
             setIsLoggingIn(false);
-            router.replace('/(Main)/Home'); // Navigate directly to Home
-        }, 1500);
+        }
     };
 
     return (
@@ -103,7 +152,7 @@ export default function LoginScreen() {
                                 Welcome to SmartGarden
                             </Text>
                             <Text className="text-gray-700 mb-4">
-                                Log in to manage your garden smartly
+                                Log in to manage your smart garden
                             </Text>
 
                             {/* Username input with icon */}
@@ -112,8 +161,14 @@ export default function LoginScreen() {
                                 <TextInput
                                     placeholder="Username"
                                     placeholderTextColor="#888"
-                                    value={username}
-                                    onChangeText={setUsername}
+                                    value={email}
+                                    onChangeText={(text) => {
+                                        setEmail(text.trim());
+                                        setErrorMessage('');
+                                    }}
+                                    autoCapitalize="none"
+                                    autoCorrect={false}
+                                    editable={!isLoggingIn}
                                     className="flex-1 ml-2 text-base"
                                 />
                             </View>
@@ -126,29 +181,38 @@ export default function LoginScreen() {
                                     placeholderTextColor="#888"
                                     secureTextEntry={!showPassword}
                                     value={password}
-                                    onChangeText={setPassword}
+                                    onChangeText={(text) => {
+                                        setPassword(text);
+                                        setErrorMessage('');
+                                    }}
+                                    editable={!isLoggingIn}
                                     className="flex-1 ml-2 text-base"
                                 />
-                                <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+                                <TouchableOpacity 
+                                    onPress={() => setShowPassword(!showPassword)}
+                                    disabled={isLoggingIn}
+                                >
                                     <MaterialIcons
                                         name={showPassword ? 'visibility-off' : 'visibility'}
                                         size={20}
-                                        color="#888"
+                                        color={isLoggingIn ? "#ccc" : "#888"}
                                     />
                                 </TouchableOpacity>
                             </View>
 
                             {errorMessage ? (
-                                <Text className="text-red-600 mb-4">{errorMessage}</Text>
+                                <View className="bg-red-50 border border-red-200 rounded-lg p-3 mb-4">
+                                    <Text className="text-red-600 text-center">{errorMessage}</Text>
+                                </View>
                             ) : null}
 
                             <Animated.View style={{ transform: [{ scale: loginScale }] }}>
                                 <TouchableOpacity
-                                    className={`py-3 rounded-xl ${(!username || !password || isLoggingIn) ? 'bg-yellow-200' : 'bg-yellow-400'}`}
-                                    disabled={!username || !password || isLoggingIn}
+                                    className={`py-3 rounded-xl ${(!email || !password || isLoggingIn) ? 'bg-yellow-200' : 'bg-yellow-400'}`}
+                                    disabled={!email || !password || isLoggingIn}
                                     onPress={handleNavigateLogin}
-                                    onPressIn={() => handlePressIn(loginScale)}
-                                    onPressOut={() => handlePressOut(loginScale)}
+                                    onPressIn={() => !isLoggingIn && handlePressIn(loginScale)}
+                                    onPressOut={() => !isLoggingIn && handlePressOut(loginScale)}
                                 >
                                     <Text className="text-center text-green-900 font-semibold">
                                         {isLoggingIn ? 'Logging in...' : 'Log In'}
@@ -162,8 +226,11 @@ export default function LoginScreen() {
                                         onPress={handleNavigateCreateAccount}
                                         onPressIn={() => handlePressIn(createScale)}
                                         onPressOut={() => handlePressOut(createScale)}
+                                        disabled={isLoggingIn}
                                     >
-                                        <Text className="text-green-800 font-semibold">Create account</Text>
+                                        <Text className={`font-semibold ${isLoggingIn ? 'text-gray-400' : 'text-green-800'}`}>
+                                            Create account
+                                        </Text>
                                     </TouchableOpacity>
                                 </Animated.View>
                                 <Animated.View style={{ transform: [{ scale: forgotScale }] }}>
@@ -171,8 +238,11 @@ export default function LoginScreen() {
                                         onPress={handleNavigateForgotPassword}
                                         onPressIn={() => handlePressIn(forgotScale)}
                                         onPressOut={() => handlePressOut(forgotScale)}
+                                        disabled={isLoggingIn}
                                     >
-                                        <Text className="text-green-800 font-semibold">Forgot password?</Text>
+                                        <Text className={`font-semibold ${isLoggingIn ? 'text-gray-400' : 'text-green-800'}`}>
+                                            Forgot password?
+                                        </Text>
                                     </TouchableOpacity>
                                 </Animated.View>
                             </View>
